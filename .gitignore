@@ -4,11 +4,12 @@ script-steps.md
 
 # Project Files
 
+.vagrant/
 HELP.md
 **/target/
 !**/.mvn/wrapper/maven-wrapper.jar
-# !**/src/main/**/target/
-# !**/src/test/**/target/
+!**/src/main/**/target/
+!**/src/test/**/target/
 
 # IDE's #
 
