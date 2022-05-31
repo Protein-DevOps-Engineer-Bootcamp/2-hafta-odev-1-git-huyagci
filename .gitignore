@@ -1,10 +1,21 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Personal Notes
+notes.md
+script-steps.md
 
-### STS ###
+# Project Files
+
+HELP.md
+**/target/
+!**/.mvn/wrapper/maven-wrapper.jar
+# !**/src/main/**/target/
+# !**/src/test/**/target/
+
+# IDE's #
+
+# Visual Studio Code
+.vscode/
+
+# Spring Tool Suite
 .apt_generated
 .classpath
 .factorypath
@@ -13,13 +24,13 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
+# IntelliJ IDEA
 .idea
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -28,6 +39,3 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-### VS Code ###
-.vscode/
