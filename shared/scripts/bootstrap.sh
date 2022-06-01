@@ -21,7 +21,7 @@ source /etc/environment
 sudo wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.5/apache-maven-3.8.5-bin.tar.gz -P /usr
 
 # Unzip Maven
-sudo tar -xf /usr/apache-maven-3.8.5-bin.tar.gz
+sudo tar -xf /usr/apache-maven-3.8.5-bin.tar.gz -C /usr
 
 # Set Alternative
 sudo update-alternatives --install /usr/bin/mvn maven /usr/apache-maven-3.8.5/bin/mvn 1001
