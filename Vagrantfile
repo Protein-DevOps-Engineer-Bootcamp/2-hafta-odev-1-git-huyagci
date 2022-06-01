@@ -29,5 +29,5 @@ Vagrant.configure("2") do |config|
     # Provision Settings
 
     # Execute given script on boot
-    # config.vm.provision "shell", path: "./shared/scripts/bootstrap.sh"
+    config.vm.provision "shell", path: "./shared/scripts/bootstrap.sh"
   end
