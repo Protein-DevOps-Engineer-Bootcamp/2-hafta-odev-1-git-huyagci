@@ -18,19 +18,19 @@ export JAVA_HOME=/usr/lib/jvm/jdk-18
 source /etc/environment
 
 # Get Maven
-sudo wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.5/apache-maven-3.8.5-bin.tar.gz -P /opt
+sudo wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.5/apache-maven-3.8.5-bin.tar.gz -P /usr
 
 # Unzip Maven
-sudo tar -xf /opt/apache-maven.3.8.5-bin.tar.gz
+sudo tar -xf /usr/apache-maven-3.8.5-bin.tar.gz
 
 # Set Alternative
-sudo update-alternatives --install /usr/bin/mvn maven /opt/apache-maven-3.8.5/bin/mvn 1001
+sudo update-alternatives --install /usr/bin/mvn maven /usr/apache-maven-3.8.5/bin/mvn 1001
 
 # Set Maven Environment Variables
-export MAVEN_HOME=/opt/apache-maven-3.8.5
-export M2_HOME=/opt/apache-maven-3.8.5
+export MAVEN_HOME=/usr/apache-maven-3.8.5
+export M2_HOME=/usr/apache-maven-3.8.5
 export PATH=${MAVEN_HOME}/bin:${PATH}
 
 # Cleanup
 sudo rm -f /tmp/jdk-18_linux-x64_bin.deb
-sudo rm -f /opt/apache-maven.3.8.5-bin.tar.gz
+sudo rm -f /usr/apache-maven.3.8.5-bin.tar.gz
