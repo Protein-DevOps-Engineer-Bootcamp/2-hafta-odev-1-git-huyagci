@@ -1,3 +1,6 @@
+# Add Git PPA
+sudo add-apt-repository ppa:git-core/ppa -y
+
 # Download latest package information
 sudo apt update
 
@@ -30,15 +33,27 @@ echo "MAVEN_HOME=/usr/apache-maven-3.8.5" >> /etc/environment
 echo "M2_HOME=/usr/apache-maven-3.8.5" >> /etc/environment
 export PATH=${MAVEN_HOME}/bin:${PATH}
 
+# Fix Installs
+sudo apt --fix-broken install -y
+
+# Upgrade Git to latest version
+sudo apt upgrade git -y
+
 # Cleanup
 sudo rm -f /tmp/jdk-18_linux-x64_bin.deb
 sudo rm -f /usr/apache-maven-3.8.5-bin.tar.gz
 
-# Git - will be edited later
+# Set Git Conf - will be edited later
 
-# git config --global user.email "example@example.com"
-# git config --global user.name "example"
+git config --global user.name "maven-builder"
+git config --global user.email "maven-builder@bashscript.com"
+
+#Initialize a dummy git repository inside the project folders
 # git init
-# git add --all
+# git add --all && git commit -am.
 # git commit -m "Initial commit"
 # ?git branch new branch?
+
+# Make executable scripts
+
+# chmod +x /opt/scripts/build_helper.sh 
