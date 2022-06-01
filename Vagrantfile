@@ -13,6 +13,10 @@ Vagrant.configure("2") do |config|
     # Use virtualbox as a VM provider
     config.vm.provider "virtualbox" do |vb|
   
+      # Fix SSH timeout & Stuck on boot
+      vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+      vb.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+
       # Virtual machine resources
       vb.memory = 4096
       vb.cpus = 2
