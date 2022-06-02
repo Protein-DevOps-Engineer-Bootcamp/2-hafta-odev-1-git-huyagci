@@ -19,16 +19,17 @@ cd $TARGET_DIR
 BUILD="mvn package"
 
 USAGE_MSG="
-    Usage: $(basename $0) [OPTION] [PARAMETER]...
+    Usage: $(basename $0) [OPTION] [ARGUMENT]...
     
-    OPTIONS:
-    [-b] [branch_name]      Branch name must be provided from the user. If not on the specified branch switch branch then build
-    [-d] [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
-    [-f] [zip|tar]          Compress format of the artifact. Must be zip or tar.gz. Else break. (branch_name.zip|tar.gz)
-    [-h, --help]            Show usage
-    [-n] [new_branch]       Create a new branch
-    [-p] [artifact_path]    Copy compressed artifacts to given path
-    [-t] [true|false]       Run or skip tests
+    OPTIONS:    ARGUMENTS:
+
+    [-b]        [branch_name]      Branch must be provided. If not on the branch switch then buil
+    [-d]        [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
+    [-f]        [zip|tar]          Compress format of the artifact. Must be zip or tar.gz. Else break.
+    [-h]                           Shows usage
+    [-n]        [new_branch]       Create a new branch
+    [-p]        [artifact_path]    Copy compressed artifacts to given path
+    [-t]        [true|false]       Run or skip tests
 "
 
 usage() {
