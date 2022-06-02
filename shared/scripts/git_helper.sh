@@ -35,7 +35,7 @@ do
                     echo
                     echo "Initializing Git for '$DIR' directory:"
                     echo
-                    (cd "$DIR" && git config --system --add safe.directory $DIR)
+                    (cd "$DIR" && git config --global --add safe.directory $DIR)
                     (cd "$DIR" && git init -q && git add . && git commit -q -m "Initial commit")
                 done
                 echo
