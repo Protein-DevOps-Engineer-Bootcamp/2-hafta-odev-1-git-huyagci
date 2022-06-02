@@ -19,15 +19,16 @@ cd $TARGET_DIR
 BUILD="mvn package -Dmaven.test.skip=true"
 
 USAGE_MSG="
-    Usage: $(basename $0) [OPTIONS]
+    Usage: $(basename $0) [OPTION] [PARAMETER]...
     
     OPTIONS:
-    [-b <branch_name>      Branch name must be provided from the user. If not on the specified branch switch branch then build]
-    [-d <true|false>       Enable|Disable debug mode. Default: DISABLED Must be taken from the user]
-    [-f <zip|tar>          Compress format of the artifact. Must be zip or tar.gz. Else break. (branch_name.zip|tar.gz)]
-    [-n <new_branch>       Create a new branch]
-    [-p <artifact_path>    Copy compressed artifacts to given path]
-    [-t <true|false>       Run or skip tests]
+    [-b] [branch_name]      Branch name must be provided from the user. If not on the specified branch switch branch then build
+    [-d] [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
+    [-f] [zip|tar]          Compress format of the artifact. Must be zip or tar.gz. Else break. (branch_name.zip|tar.gz)
+    [-h, --help]            Show usage
+    [-n] [new_branch]       Create a new branch
+    [-p] [artifact_path]    Copy compressed artifacts to given path
+    [-t] [true|false]       Run or skip tests
 "
 
 usage() {
