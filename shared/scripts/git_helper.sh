@@ -1,6 +1,8 @@
 #!/bin/bash
 
 TARGET_DIR=/opt/project
+FIND_GIT=$(find $TARGET_DIR/ -type d -name '*.git*')
+FIND_DIRS=$(find $TARGET_DIR/* -maxdepth 0 -type d)
 
 clear
 echo "This script will help you manage the git instances for the main script."
@@ -20,7 +22,7 @@ do
                 echo
                 echo "Found Git under:"
                 echo
-                for DIR in $(find $TARGET_DIR/ -type d -name '*.git*');
+                for DIR in ${FIND_GIT[@]}
                 do
                     echo $(dirname $DIR)
                 done
@@ -28,7 +30,7 @@ do
                 break
                 ;;
             "Initialize Git")
-                for DIR in `find $TARGET_DIR/* -maxdepth 0 -type d`
+                for DIR in ${FIND_DIRS[@]}
                 do
                     echo
                     echo "Initializing Git for '$DIR' directory:"
@@ -43,7 +45,7 @@ do
                 echo
                 echo "Terminating Git for all directories under '$TARGET_DIR' directory:"
                 echo
-                for DIR in `find $TARGET_DIR/* -maxdepth 0 -type d`
+                for DIR in ${FIND_DIRS[@]}
                 do
                     (cd "$DIR" && rm -rf .git/)
                     (cd "$DIR" && echo "Git instance under $DIR is terminated.")
