@@ -37,6 +37,10 @@ usage() {
     exit 1
 }
 
+# archive_artifact() {
+#     md5sum
+# }
+
 # if [ "$#" -lt 1 ]
 # then
 #     usage
@@ -49,38 +53,31 @@ while getopts b:d:f:hn:p:t: options
 do
     case "${options}" in
         b) BRANCH=${OPTARG};;
-        d) DEBUG=${OPTARG};;
+        # d) DEBUG=${OPTARG};;
+        d) if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi ;;
         f) FORMAT=${OPTARG};;
         h) usage;;
         n) NEW_BRANCH=${OPTARG};;
         p) OUTPUT_PATH=${OPTARG};;
-        t) SKIP_TESTS=${OPTARG};;
+        t) if [ "${OPTARG}" == "true" ]; then BUILD+=" -Dmaven.test.skip=true"; fi ;;
         # *) ??
         #     usage
         #     ;;
         ?)
+            echo
             echo "Invalid Option: ${OPTARG}"
             usage
             ;;
     esac
 done
 
+echo
 echo "Branch: ${BRANCH}"
-echo "Debug: ${DEBUG} DEFAULT: FALSE"
+echo "Debug: ${DEBUG} | DEFAULT: FALSE"
 echo "Format: ${FORMAT}"
 echo "New Branch: ${NEW_BRANCH}"
 echo "Output Path: ${OUTPUT_PATH}"
-echo "Skip Tests: ${SKIP_TESTS} DEFAULT: FALSE"
-
-if [ "${DEBUG}" == "true" ]
-then
-    BUILD+=" -X"
-fi
-
-if [ "${SKIP_TESTS}" == "true" ]
-then
-    BUILD+=" -Dmaven.test.skip=true"
-fi
+echo "Skip Tests: ${SKIP_TESTS} | DEFAULT: FALSE"
 
 # if [ "${current_folder}" == false ]
 # then
