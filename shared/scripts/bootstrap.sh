@@ -51,8 +51,8 @@ sudo rm -f /usr/apache-maven-3.8.5-bin.tar.gz
 
 # Set Git Conf - will be edited later
 
-git config --global user.name "maven-builder"
-git config --global user.email "maven-builder@bashscript.com"
+git config --system user.name "maven-builder"
+git config --system user.email "maven-builder@bashscript.com"
 
 #Initialize a dummy git repository inside the project folders
 # git init
