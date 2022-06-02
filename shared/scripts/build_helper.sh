@@ -37,6 +37,35 @@ usage() {
     exit 1
 }
 
+build(){
+    echo "Building project..."
+    BRANCH_LIST=( $(git branch | tr -d ' ,*') )
+    CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+    SELECTED_BRANCH=${OPTARG}
+
+    if [[ " ${BRANCH_LIST[*]} " =~ " ${SELECTED_BRANCH} " ]]
+    then
+        if [ "${SELECTED_BRANCH}" == " ${CURRENT_BRANCH} " ]
+        then
+            # {BUILD COMMAND}
+        else
+            git switch ${SELECTED_BRANCH}
+            # {BUILD COMMAND}
+        fi
+    else
+        git checkout -b ${SELECTED_BRANCH}
+        # {BUILD COMMAND}
+    fi
+}
+
+debug_mode() {
+    if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
+}
+
+skip_tests() {
+    if [ "${OPTARG}" == "true" ]; then BUILD+=" -Dmaven.test.skip=true"; fi 
+}
+
 # archive_artifact() {
 #     md5sum
 # }
@@ -49,17 +78,18 @@ usage() {
 DEBUG=false
 SKIP_TESTS=false
 
-while getopts b:d:f:hn:p:t: options
+while getopts b:d:f:n:p:t:h options
 do
     case "${options}" in
         b) BRANCH=${OPTARG};;
         # d) DEBUG=${OPTARG};;
-        d) if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi ;;
+        # d) if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi ;;
+        d) debug_mode;;
         f) FORMAT=${OPTARG};;
         h) usage;;
         n) NEW_BRANCH=${OPTARG};;
         p) OUTPUT_PATH=${OPTARG};;
-        t) if [ "${OPTARG}" == "true" ]; then BUILD+=" -Dmaven.test.skip=true"; fi ;;
+        t) skip_tests;;
         # *) ??
         #     usage
         #     ;;
