@@ -16,7 +16,7 @@ TARGET_DIR=/opt/project/java
 # CD to target directory if executed from another directory
 cd $TARGET_DIR
 
-BUILD="mvn package -Dmaven.test.skip=true"
+BUILD="mvn package"
 
 USAGE_MSG="
     Usage: $(basename $0) [OPTION] [PARAMETER]...
@@ -41,7 +41,10 @@ usage() {
 #     usage
 # fi
 
-while getopts b:d:f:h:n:p:t: options
+DEBUG=false
+SKIP_TESTS=false
+
+while getopts b:d:f:hn:p:t: options
 do
     case "${options}" in
         b) BRANCH=${OPTARG};;
@@ -50,7 +53,7 @@ do
         h) usage;;
         n) NEW_BRANCH=${OPTARG};;
         p) OUTPUT_PATH=${OPTARG};;
-        t) TEST=${OPTARG};;
+        t) SKIP_TESTS=${OPTARG};;
         # *) ??
         #     usage
         #     ;;
@@ -62,19 +65,97 @@ do
 done
 
 echo "Branch: ${BRANCH}"
-echo "Debug: ${DEBUG}"
+echo "Debug: ${DEBUG} DEFAULT: FALSE"
 echo "Format: ${FORMAT}"
 echo "New Branch: ${NEW_BRANCH}"
-echo "OUTPUT_PATH: ${OUTPUT_PATH}"
-echo "Test: ${TEST}"
+echo "Output Path: ${OUTPUT_PATH}"
+echo "Skip Tests: ${SKIP_TESTS} DEFAULT: FALSE"
+
+if [ "${DEBUG}" == "true" ]
+then
+    BUILD+=" -X"
+fi
+
+if [ "${SKIP_TESTS}" == "true" ]
+then
+    BUILD+=" -Dmaven.test.skip=true"
+fi
+
+# if [ "${current_folder}" == false ]
+# then
+#     echo "Where is your pom.xml file located?"
+#     read PATH
+#     BUILD+= " -f $PATH"
+#     # mvn package -f /path/to/pom.xml
+# fi
+
+echo
+echo "Output: "
+eval echo $BUILD
+echo
 
 
+
+
+
+###############################################################################
+# Shift Method for args
+###############################################################################
+# while true
+# do
+#     case "$1" in
+#         -b)
+#             BRANCH=$2
+#             shift 2
+#             ;;
+#         -d)
+#             DEBUG=$2
+#             shift 2
+#             ;;
+#         -f)
+#             FORMAT=$2
+#             shift 2
+#             ;;
+#         -h)
+#             usage
+#             ;;
+#         -n)
+#             NEW_BRANCH=$2
+#             shift 2
+#             ;;
+#         -p)
+#             OUTPUT_PATH=$2
+#             shift 2
+#             ;;
+#         -t)
+#             TESTS=$2
+#             shift 2
+#             ;;
+#         *)
+#             usage
+#             break
+#             ;;
+#     esac
+# done
+
+# echo "Branch: ${BRANCH}"
+# echo "Debug: ${DEBUG}"
+# echo "Format: ${FORMAT}"
+# echo "New Branch: ${NEW_BRANCH}"
+# echo "OUTPUT_PATH: ${OUTPUT_PATH}"
+# echo "Tests: ${TESTS}"
+
+###############################################################################
+# Script execution ends here
+###############################################################################
 # eval "$BUILD"
 
 # CD to previous directory if executed from another directory
 # cd -
 
+###############################################################################
 # Some welcome messages etc..
+###############################################################################
 # echo "Welcome to Build Helper"
 # sleep 1
 # echo "Who am I talking to?"
@@ -84,3 +165,4 @@ echo "Test: ${TEST}"
 # sleep 1
 # echo 
 # echo "What would you like to do today?"
+###############################################################################
