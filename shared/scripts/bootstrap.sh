@@ -1,3 +1,9 @@
+# Set time zone to UTC+3
+sudo timedatectl set-timezone Europe/Istanbul
+
+# Enable NTP and system clock sync
+sudo timedatectl set-ntp true
+
 # Add Git PPA
 sudo add-apt-repository ppa:git-core/ppa -y
 
