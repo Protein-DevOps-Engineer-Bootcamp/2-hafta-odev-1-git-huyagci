@@ -18,18 +18,17 @@ cd $TARGET_DIR
 
 BUILD="mvn package"
 
-# USAGE_MSG="
-#     Usage: $(basename $0) [OPTIONS]
+USAGE_MSG="
+    Usage: $(basename $0) [OPTIONS]
     
-#     OPTIONS:
-#     [-b <branch_name>]      Branch name
-#     [-n <new_branch>]       Create new branch
-#     [-f <zip|tar>]          Compress format
-#     [-p <artifact_path>]    Copy artifact to spesific path
-# "
-#     -d      <true|false>        Enable debug mode.
-#     -t      <true|false>        Run or skip tests.
-#     -d      <true|false>        Build from current dir or provide another dir.
+    OPTIONS:
+    [-b <branch_name>]      Branch name must be provided from the user. If not on the specified branch switch branch then build.
+    [-d <true|false>]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user.
+    [-f <zip|tar>]          Compress format of the artifact. Must be zip or tar.gz. Else break. (branch_name.zip|tar.gz)
+    [-n <new_branch>]       Create a new branch
+    [-p <artifact_path>]    Copy compressed artifacts to given path.
+    [-t <true|false>]       Run or skip tests.
+"
 
 eval "$BUILD"
 
