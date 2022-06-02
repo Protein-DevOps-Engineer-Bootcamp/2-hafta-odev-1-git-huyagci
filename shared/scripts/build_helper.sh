@@ -36,15 +36,43 @@ usage() {
     exit 1
 }
 
-if [ "$#" -lt 1 ]
-then
-    usage
-fi
+# if [ "$#" -lt 1 ]
+# then
+#     usage
+# fi
 
-eval "$BUILD"
+while getopts b:d:f:h:n:p:t: options
+do
+    case "${options}" in
+        b) BRANCH=${OPTARG};;
+        d) DEBUG=${OPTARG};;
+        f) FORMAT=${OPTARG};;
+        h) usage;;
+        n) NEW_BRANCH=${OPTARG};;
+        p) OUTPUT_PATH=${OPTARG};;
+        t) TEST=${OPTARG};;
+        # *) ??
+        #     usage
+        #     ;;
+        ?)
+            echo "Invalid Option: ${OPTARG}"
+            usage
+            ;;
+    esac
+done
+
+echo "Branch: ${BRANCH}"
+echo "Debug: ${DEBUG}"
+echo "Format: ${FORMAT}"
+echo "New Branch: ${NEW_BRANCH}"
+echo "OUTPUT_PATH: ${OUTPUT_PATH}"
+echo "Test: ${TEST}"
+
+
+# eval "$BUILD"
 
 # CD to previous directory if executed from another directory
-cd -
+# cd -
 
 # Some welcome messages etc..
 # echo "Welcome to Build Helper"
