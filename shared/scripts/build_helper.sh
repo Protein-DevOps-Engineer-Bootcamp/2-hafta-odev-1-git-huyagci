@@ -10,8 +10,8 @@
 
 # Predefined Variables
 TARGET_DIR=/opt/project/java
-
-# Script Execution
+DEBUG=false
+SKIP_TESTS=false
 
 # CD to target directory if executed from another directory
 cd $TARGET_DIR
@@ -37,58 +37,102 @@ usage() {
     exit 1
 }
 
-build(){
-    echo "Building project..."
-    BRANCH_LIST=( $(git branch | tr -d ' ,*') )
-    CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+branch() {
     SELECTED_BRANCH=${OPTARG}
-
-    if [[ " ${BRANCH_LIST[*]} " =~ " ${SELECTED_BRANCH} " ]]
-    then
-        if [ "${SELECTED_BRANCH}" == " ${CURRENT_BRANCH} " ]
-        then
-            # {BUILD COMMAND}
-        else
-            git switch ${SELECTED_BRANCH}
-            # {BUILD COMMAND}
-        fi
-    else
-        git checkout -b ${SELECTED_BRANCH}
-        # {BUILD COMMAND}
-    fi
 }
 
 debug_mode() {
     if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
 }
 
+archive_artifact() {
+    if [ "${OPTARG}" == "zip" | "tar.gz" ]
+    then
+        if [ "${OPTARG}" == "zip" ]
+        then
+            ARCHIVE_FORMAT="zip"
+        else
+            ARCHIVE_FORMAT="tar.gz"
+        fi
+    else
+        echo "Invalid archive format selected. Must be zip or tar.gz"
+        break
+    fi
+}
+
+# Create a new branch (IF ARG IS GIVEN)
+new_branch() {
+    if [ "${OPTARG}" == {{{{{EXISTS}}}}} ]; then git branch ${OPTARG}; fi
+}
+
+# If arg is given set Output Path of the Archive else build into same directory
+output_path() {
+    if [ "${OPTARG}" == {{{{{EXISTS}}}}} ]
+    then
+        OUTPUT_PATH=${OPTARG}
+    else
+        OUTPUT_PATH="${pwd}"
+    fi
+}
+
 skip_tests() {
     if [ "${OPTARG}" == "true" ]; then BUILD+=" -Dmaven.test.skip=true"; fi 
 }
 
-# archive_artifact() {
-#     md5sum
-# }
+build(){
+    BRANCH_LIST=( $(git branch | tr -d ' ,*') )
+    CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+    echo
+    echo "Building project on ${SELECTED_BRANCH} branch"
+    echo
+    if [[ " ${BRANCH_LIST[*]} " =~ " ${SELECTED_BRANCH} " ]]
+    then
+        if [ " ${SELECTED_BRANCH} " == " ${CURRENT_BRANCH} " ]
+        then
+            echo
+            echo "SELECTED BRANCH IS CURRENT BRANCH"
+            echo
+            eval echo $BUILD
+        else
+            echo
+            echo "SELECTED BRANCH IS NOT CURRENT BRANCH SWITCHING BRANCH"
+            git switch ${SELECTED_BRANCH}
+            eval echo $BUILD
+        fi
+    else
+        echo
+        echo "SELECTED BRANCH IS NOT EXIST... CREATING REQUESTED BRANCH"
+        git checkout -b ${SELECTED_BRANCH}
+        eval echo $BUILD
+    fi
+}
 
+compress() {
+    TARGET_DIR=/opt/project
+    TARGET_FILE=$(find $TARGET_DIR/ -type f -name "*.jar")
+    if [ "${ARCHIVE_FORMAT}" == "zip" ]
+    then
+        zip -r ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+    else
+        tar -czf ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+    fi
+}
+
+# If no args are given show usage
 # if [ "$#" -lt 1 ]
 # then
 #     usage
 # fi
 
-DEBUG=false
-SKIP_TESTS=false
-
 while getopts b:d:f:n:p:t:h options
 do
     case "${options}" in
-        b) BRANCH=${OPTARG};;
-        # d) DEBUG=${OPTARG};;
-        # d) if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi ;;
+        b) branch;;
         d) debug_mode;;
-        f) FORMAT=${OPTARG};;
+        f) archive_artifact;;
         h) usage;;
-        n) NEW_BRANCH=${OPTARG};;
-        p) OUTPUT_PATH=${OPTARG};;
+        n) new_branch;;
+        p) output_path;;
         t) skip_tests;;
         # *) ??
         #     usage
@@ -102,12 +146,10 @@ do
 done
 
 echo
-echo "Branch: ${BRANCH}"
-echo "Debug: ${DEBUG} | DEFAULT: FALSE"
+echo "Branch: ${SELECTED_BRANCH}"
 echo "Format: ${FORMAT}"
 echo "New Branch: ${NEW_BRANCH}"
 echo "Output Path: ${OUTPUT_PATH}"
-echo "Skip Tests: ${SKIP_TESTS} | DEFAULT: FALSE"
 
 # if [ "${current_folder}" == false ]
 # then
@@ -117,13 +159,13 @@ echo "Skip Tests: ${SKIP_TESTS} | DEFAULT: FALSE"
 #     # mvn package -f /path/to/pom.xml
 # fi
 
-echo
-echo "Output: "
-eval echo $BUILD
-echo
+# Get build
+build
+compress
 
 
-
+# CD to previous directory if executed from another directory
+cd -
 
 
 ###############################################################################
@@ -165,21 +207,6 @@ echo
 #             ;;
 #     esac
 # done
-
-# echo "Branch: ${BRANCH}"
-# echo "Debug: ${DEBUG}"
-# echo "Format: ${FORMAT}"
-# echo "New Branch: ${NEW_BRANCH}"
-# echo "OUTPUT_PATH: ${OUTPUT_PATH}"
-# echo "Tests: ${TESTS}"
-
-###############################################################################
-# Script execution ends here
-###############################################################################
-# eval "$BUILD"
-
-# CD to previous directory if executed from another directory
-# cd -
 
 ###############################################################################
 # Some welcome messages etc..
