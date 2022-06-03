@@ -23,14 +23,14 @@ USAGE_MSG="
 
     OPTIONS:    ARGUMENTS:         DESCRIPTION:
 
-    [-b]        [branch_name]      Branch must be provided. If not on the branch switch then buil
-    [-c]                           Cleans the target folder
-    [-d]        [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
-    [-f]        [zip|tar]          Compress format of the artifact. Must be zip or tar.gz. Else break.
-    [-h]                           Shows usage
-    [-n]        [new_branch]       Create a new branch
-    [-p]        [artifact_path]    Copy compressed artifacts to given path
-    [-t]        [true|false]       Run or skip tests
+    [ -b ]      [branch_name]      Branch must be provided. If not on the branch switch then buil
+    [ -c ]                         Cleans the target folder
+    [ -d ]      [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
+    [ -f ]      [zip|tar]          Compress format of the artifact. Must be zip or tar.gz. Else break.
+    [ -h ]                         Shows usage
+    [ -n ]      [new_branch]       Create a new branch
+    [ -p ]      [artifact_path]    Copy compressed artifacts to given path
+    [ -t ]      [true|false]       Run or skip tests
 "
 
 usage() {
