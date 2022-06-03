@@ -45,7 +45,10 @@ sudo apt --fix-broken install -y
 # Upgrade Git to latest version
 sudo apt upgrade git -y
 
-# Cleanup
+# Install zip
+sudo apt install zip -y
+
+# Cleanup Downloads
 sudo rm -f /tmp/jdk-18_linux-x64_bin.deb
 sudo rm -f /usr/apache-maven-3.8.5-bin.tar.gz
 
