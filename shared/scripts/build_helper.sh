@@ -62,20 +62,15 @@ build() {
     if [ -z "$ARCHIVE_FORMAT" ] || ! [[ "$ARCHIVE_FORMAT" == "zip" || "$ARCHIVE_FORMAT" == "tar.gz" ]]
     then
         echo
-        echo "INVALID ARCHIVE FORMAT: '$ARCHIVE_FORMAT'"
-        echo "You must provide an archive format."
+        echo "You must provide a valid archive format. Must be 'zip' or 'tar.gz'"
         usage
         exit 1
     else
         BRANCH_LIST=( $(git branch | tr -d ' ,*') )
+
         CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 
-        if [ -z "${SELECTED_BRANCH}" ];
-        then
-            SELECTED_BRANCH=${CURRENT_BRANCH}
-            echo
-            echo "BRANCH IS NOT SELECTED. USING $SELECTED_BRANCH CURRENT BRANCH $CURRENT_BRANCH"
-        fi
+        if [ -z "${SELECTED_BRANCH}" ]; then SELECTED_BRANCH=${CURRENT_BRANCH}; fi
 
         if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
         then
@@ -87,22 +82,12 @@ build() {
         then
             if [ "${SELECTED_BRANCH}" == "${CURRENT_BRANCH}" ]
             then
-                echo
-                echo "SELECTED BRANCH IS $SELECTED_BRANCH EQUALS TO CURRENT BRANCH IS $CURRENT_BRANCH"
-                echo
-                echo "OUTPUT COMMAND:"
                 eval $BUILD
                 compress
-                echo
             else
-                echo
-                echo "SELECTED BRANCH $SELECTED_BRANCH IS NOT CURRENT BRANCH $CURRENT_BRANCH... SWITCHING BRANCH TO $SELECTED_BRANCH"
                 git switch ${SELECTED_BRANCH}
-                echo
-                echo "OUTPUT COMMAND:"
                 eval $BUILD
                 compress
-                echo
             fi
         else
             echo
@@ -120,46 +105,32 @@ build() {
 }
 
 compress() {
-    # If arg is given set Output Path of the Archive else archive into same directory
+    # If an arg is given, set output dir of the archive. else archive in same dir
     if [ -z "${OUTPUT_DIR}" ]
     then
         OUTPUT_DIR=${CURRENT_DIR}
-        echo "***OUTPUT DIR IS NOT PROVIDED. USING WORKING DIR..."
         echo
-        echo "OUTPUT DIR:"
+        echo "Output directory is not specified. Using current directory."
         echo $OUTPUT_DIR
         echo
     else
         OUTPUT_DIR=${OUTPUT_DIR}
-        echo "OUTPUT DIR IS PROVIDED. USING USER SPECIFIED DIR..."
-        echo
-        echo "OUTPUT DIR:"
-        echo $OUTPUT_DIR
-        echo
     fi
 
     TARGET_FILE=$(find $TARGET_DIR/target/ -type f -name "*.jar" -or -name "*.war" )
 
-    echo "TARGET FILE:"
-    echo $TARGET_FILE
-    echo
-    echo "ARCHIVE FORMAT:"
-    echo $ARCHIVE_FORMAT
-
     if [ "${ARCHIVE_FORMAT}" == "zip" ]
     then
         zip -q -j ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
-        echo "$TARGET_FILE is archived as $ARCHIVE_FORMAT"
     fi
 
     if [ "${ARCHIVE_FORMAT}" == "tar.gz" ]
     then
         tar -C $(dirname "${TARGET_FILE}") -Pczf ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} $(basename "${TARGET_FILE}")
-        echo "$TARGET_FILE is archived as $ARCHIVE_FORMAT"
     fi
 }
 
-while getopts b:d:f:n:p:t:ch options
+while getopts ":b:d:f:n:p:t:ch" options
 do
     case "${options}" in
         b) SELECTED_BRANCH=${OPTARG};;
@@ -170,11 +141,8 @@ do
         n) new_branch;;
         p) OUTPUT_DIR=${OPTARG};;
         t) tests;;
-        *) echo "Wildcard"
-            ;;
-        ?)
-            echo
-            echo "Invalid Option: ${OPTARG}"
+        ?)  echo
+            echo "Invalid Option: -${OPTARG}"
             usage
             ;;
     esac
@@ -183,35 +151,11 @@ done
 # If -c opt is given clean maven target else get build
 if [[ "$1" == "-c" && "$1" -lt 1 ]]
 then
-    echo "Clean"
     clean_maven
 else
-    echo "Build"
     # Get build
     build
 fi
 
-# # Output information
-# echo "Your artifact will be compressed and saved under ${OUTPUT_DIR}"
-
-# # Variable Tests (WILL BE DELETED)
-# echo
-# echo "Selected Branch: ${SELECTED_BRANCH}"
-# echo "New Branch: ${NEW_BRANCH}"
-
 # CD to previous directory if executed from another directory
 cd - &>/dev/null
-
-###############################################################################
-# Some welcome messages etc..
-###############################################################################
-# echo "Welcome to Build Helper"
-# sleep 1
-# echo "Who am I talking to?"
-# read NAME
-# sleep 1
-# echo "Nice to meet you, $NAME!"
-# sleep 1
-# echo 
-# echo "What would you like to do today?"
-###############################################################################
