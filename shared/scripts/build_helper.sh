@@ -9,8 +9,6 @@
 # Email         : hasanumutyagci@gmail.com  #
 #############################################
 
-
-
 # Predefined Variables
 CURRENT_DIR=$(pwd)
 TARGET_DIR=/opt/project/java
@@ -40,24 +38,14 @@ usage() {
     exit 1
 }
 
-# branch() {
-#     if [ -z "${OPTARG}" ]
-#     then
-#         echo "You did not provide a branch name. Selecting current branch."
-#         SELECTED_BRANCH=${CURRENT_BRANCH}
-#     else
-#         SELECTED_BRANCH=${OPTARG}
-#     fi
-# }
-
 debug_mode() {
     if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
 }
 
 # Create a new branch (IF ARG IS GIVEN)
-new_branch() {
-    if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
-}
+# new_branch() {
+#     if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
+# }
 
 # skip_tests() {
 #     if [ "${OPTARG}" == false ]
@@ -67,9 +55,6 @@ new_branch() {
 #         BUILD+=" -Dmaven.test.skip=true"
 #     fi 
 # }
-
-# if [ [ "$my_error_flag"=="1" || "$my_error_flag_o"=="2" ] || [ "$my_error_flag"="1" &&     "$my_error_flag_o"="2" ]]; then
-#     echo "$my_error_flag"
 
 build() {
     if [ -z "$ARCHIVE_FORMAT" ] || ! [[ "$ARCHIVE_FORMAT" == "zip" || "$ARCHIVE_FORMAT" == "tar.gz" ]]
@@ -136,13 +121,19 @@ compress() {
     if [ -z "${OUTPUT_DIR}" ]
     then
         OUTPUT_DIR=${CURRENT_DIR}
+        echo "OUTPUT DIR IS NOT PROVIDED. USING WORKING DIR..."
+        echo
+        echo "OUTPUT DIR:"
+        echo $OUTPUT_DIR
+        echo
     else
         OUTPUT_DIR=${OUTPUT_DIR}
+        echo "OUTPUT DIR IS PROVIDED. USING USER SPECIFIED DIR..."
+        echo
+        echo "OUTPUT DIR:"
+        echo $OUTPUT_DIR
+        echo
     fi
-    echo
-    echo "OUTPUT DIR:"
-    echo $OUTPUT_DIR
-    echo
 
     TARGET_FILE=$(find $TARGET_DIR/target/ -type f -name "*.jar" -or -name "*.war" )
 
@@ -152,42 +143,25 @@ compress() {
     echo "ARCHIVE FORMAT:"
     echo $ARCHIVE_FORMAT
 
-    # if [ "${ARCHIVE_FORMAT}" == "zip" ]
-    # then
-    #     zip -r ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
-    # else
-    #     tar -Pczf ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
-    # fi
+    if [ "${ARCHIVE_FORMAT}" == "zip" ]
+    then
+        zip -r ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+        echo "$TARGET_FILE is archived as $ARCHIVE_FORMAT"
+    fi
 
-    # if [ ]
-    # then
-    #     if [ "${OPTARG}" == "zip" ]
-    #     then
-    #         ARCHIVE_FORMAT="zip"
-    #     else
-    #         ARCHIVE_FORMAT="tar.gz"
-    #     fi
-    # else
-    #     echo "Invalid archive format selected. Must be zip or tar.gz"
-    #     break
-    # fi
+    if [ "${ARCHIVE_FORMAT}" == "tar.gz" ]
+    then
+        tar -Pczf ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+        echo "$TARGET_FILE is archived as $ARCHIVE_FORMAT"
+    fi
 }
-
-# If no args are given show usage
-# if [ "$#" -lt 1 ]
-# then
-#     usage
-# fi
 
 while getopts b:d:f:n:p:t:h options
 do
     case "${options}" in
         b) SELECTED_BRANCH=${OPTARG};;
-            # branch;;
         d) debug_mode;;
-        f) ARCHIVE_FORMAT=${OPTARG}
-            echo $ARCHIVE_FORMAT
-            ;;
+        f) ARCHIVE_FORMAT=${OPTARG};;
         h) usage;;
         n) new_branch;;
         p) OUTPUT_DIR=${OPTARG};;
@@ -205,9 +179,6 @@ done
 # Get build
 build
 
-# Compress
-# compress
-
 # Output information
 echo "Your artifact will be compressed and saved under ${OUTPUT_DIR}"
 
@@ -218,6 +189,12 @@ echo "New Branch: ${NEW_BRANCH}"
 
 # CD to previous directory if executed from another directory
 cd -
+
+# If no args are given show usage
+# if [ "$#" -lt 1 ]
+# then
+#     usage
+# fi
 
 ###############################################################################
 # Some welcome messages etc..
