@@ -115,7 +115,7 @@ compress() {
         OUTPUT_DIR=${OUTPUT_DIR}
     fi
 
-    TARGET_FILE=$(find $TARGET_DIR/target/ -type f -name "*.jar" -or -name "*.war" )
+    TARGET_FILE=$(find $TARGET_DIR/target/ -type f -name "*SNAPSHOT.jar" -or -name "*SNAPSHOT.war" )
 
     if [ "${ARCHIVE_FORMAT}" == "zip" ]
     then
