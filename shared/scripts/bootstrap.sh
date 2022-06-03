@@ -52,17 +52,12 @@ sudo apt install zip -y
 sudo rm -f /tmp/jdk-18_linux-x64_bin.deb
 sudo rm -f /usr/apache-maven-3.8.5-bin.tar.gz
 
-# Set Git Conf - will be edited later
+# Set Git Conf - will be edited
+sudo git config --system user.name "maven-builder"
+sudo git config --system user.email "maven-builder@bashscript.com"
+sudo git config --system --add safe.directory /opt/projects/java
+sudo git config --global --add safe.directory /opt/projects/java
 
-git config --system user.name "maven-builder"
-git config --system user.email "maven-builder@bashscript.com"
-
-#Initialize a dummy git repository inside the project folders
-# git init
-# git add --all && git commit -am.
-# git commit -m "Initial commit"
-# ?git branch new branch?
-
-# Make executable scripts
-
+# Give execution perm to scripts
+# chmod +x /opt/scripts/git_helper.sh 
 # chmod +x /opt/scripts/build_helper.sh 
