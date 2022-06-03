@@ -39,7 +39,7 @@ usage() {
 }
 
 debug_mode() {
-    if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
+    if [ -n "$OPTARG" ] && [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
 }
 
 # Create a new branch (IF ARG IS GIVEN)
