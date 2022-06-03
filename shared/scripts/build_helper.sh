@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 #############################################
 # Script Name   : Build Helper              #
@@ -54,27 +54,10 @@ debug_mode() {
     if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
 }
 
-archive_artifact() {
-    if [ "${OPTARG}" == "zip" | "tar.gz" ]
-    then
-        if [ "${OPTARG}" == "zip" ]
-        then
-            ARCHIVE_FORMAT="zip"
-        else
-            ARCHIVE_FORMAT="tar.gz"
-        fi
-    else
-        echo "Invalid archive format selected. Must be zip or tar.gz"
-        break
-    fi
-}
-
 # Create a new branch (IF ARG IS GIVEN)
 new_branch() {
     if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
 }
-
-
 
 # skip_tests() {
 #     if [ "${OPTARG}" == false ]
@@ -85,57 +68,70 @@ new_branch() {
 #     fi 
 # }
 
+# if [ [ "$my_error_flag"=="1" || "$my_error_flag_o"=="2" ] || [ "$my_error_flag"="1" &&     "$my_error_flag_o"="2" ]]; then
+#     echo "$my_error_flag"
+
 build() {
-
-    BRANCH_LIST=( $(git branch | tr -d ' ,*') )
-    CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-
-    if [ -z "${SELECTED_BRANCH}" ];
-    then
-        SELECTED_BRANCH=${CURRENT_BRANCH}
-        echo
-        echo "Branch is not selected. Using Current Branch."
-            
-    fi
-
-    if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
+    if [ -z "$ARCHIVE_FORMAT" ] || ! [[ "$ARCHIVE_FORMAT" == "zip" || "$ARCHIVE_FORMAT" == "tar.gz" ]]
     then
         echo
-        echo "Warning!!! You are building on ${SELECTED_BRANCH} branch!"
-    fi
+        echo "INVALID ARCHIVE FORMAT: '$ARCHIVE_FORMAT'"
+        echo "You must provide an archive format."
+        usage
+        exit 1
+    else
+        BRANCH_LIST=( $(git branch | tr -d ' ,*') )
+        CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 
-    if [[ "${BRANCH_LIST[*]}" =~ "${SELECTED_BRANCH}" ]]
-    then
-        if [ "${SELECTED_BRANCH}" == "${CURRENT_BRANCH}" ]
+        if [ -z "${SELECTED_BRANCH}" ];
+        then
+            SELECTED_BRANCH=${CURRENT_BRANCH}
+            echo
+            echo "BRANCH IS NOT SELECTED. USING $SELECTED_BRANCH CURRENT BRANCH $CURRENT_BRANCH"
+                
+        fi
+
+        if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
         then
             echo
-            echo "SELECTED BRANCH IS CURRENT BRANCH"
-            echo
-            echo "OUTPUT COMMAND:"
-            eval echo $BUILD
-            echo
+            echo "Warning!!! You are building on ${SELECTED_BRANCH} branch!"
+        fi
+
+        if [[ "${BRANCH_LIST[*]}" =~ "${SELECTED_BRANCH}" ]]
+        then
+            if [ "${SELECTED_BRANCH}" == "${CURRENT_BRANCH}" ]
+            then
+                echo
+                echo "SELECTED BRANCH IS $SELECTED_BRANCH EQUALS TO CURRENT BRANCH IS $CURRENT_BRANCH"
+                echo
+                echo "OUTPUT COMMAND:"
+                eval echo $BUILD
+                compress
+                echo
+            else
+                echo
+                echo "SELECTED BRANCH $SELECTED_BRANCH IS NOT CURRENT BRANCH $CURRENT_BRANCH... SWITCHING BRANCH TO $SELECTED_BRANCH"
+                git switch ${SELECTED_BRANCH}
+                echo
+                echo "OUTPUT COMMAND:"
+                eval echo $BUILD
+                compress
+                echo
+            fi
         else
             echo
-            echo "SELECTED BRANCH IS NOT CURRENT BRANCH... SWITCHING BRANCH"
-            git switch ${SELECTED_BRANCH}
+            echo "SELECTED BRANCH IS NOT EXISTS... CREATING REQUESTED BRANCH..."
+            git checkout -b ${SELECTED_BRANCH}
             echo
             echo "OUTPUT COMMAND:"
             eval echo $BUILD
+            compress
             echo
         fi
-    else
-        echo
-        echo "SELECTED BRANCH IS NOT EXISTS... CREATING REQUESTED BRANCH..."
-        git checkout -b ${SELECTED_BRANCH}
-        echo
-        echo "OUTPUT COMMAND:"
-        eval echo $BUILD
-        echo
     fi
 }
 
 compress() {
-
     # If arg is given set Output Path of the Archive else archive into same directory
     if [ -z "${OUTPUT_DIR}" ]
     then
@@ -143,17 +139,37 @@ compress() {
     else
         OUTPUT_DIR=${OUTPUT_DIR}
     fi
-    
+    echo
     echo "OUTPUT DIR:"
     echo $OUTPUT_DIR
     echo
 
-    # TARGET_FILE=$(find $TARGET_DIR/ -type f -name "*.jar")
+    TARGET_FILE=$(find $TARGET_DIR/target/ -type f -name "*.jar" -or -name "*.war" )
+
+    echo "TARGET FILE:"
+    echo $TARGET_FILE
+    echo
+    echo "ARCHIVE FORMAT:"
+    echo $ARCHIVE_FORMAT
+
     # if [ "${ARCHIVE_FORMAT}" == "zip" ]
     # then
     #     zip -r ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
     # else
     #     tar -Pczf ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+    # fi
+
+    # if [ ]
+    # then
+    #     if [ "${OPTARG}" == "zip" ]
+    #     then
+    #         ARCHIVE_FORMAT="zip"
+    #     else
+    #         ARCHIVE_FORMAT="tar.gz"
+    #     fi
+    # else
+    #     echo "Invalid archive format selected. Must be zip or tar.gz"
+    #     break
     # fi
 }
 
@@ -169,7 +185,9 @@ do
         b) SELECTED_BRANCH=${OPTARG};;
             # branch;;
         d) debug_mode;;
-        f) archive_artifact;;
+        f) ARCHIVE_FORMAT=${OPTARG}
+            echo $ARCHIVE_FORMAT
+            ;;
         h) usage;;
         n) new_branch;;
         p) OUTPUT_DIR=${OPTARG};;
@@ -188,17 +206,15 @@ done
 build
 
 # Compress
-compress
+# compress
 
-# Output informatin
-echo "Your artifact will be compressed and saved to ${OUTPUT_PATH}"
+# Output information
+echo "Your artifact will be compressed and saved under ${OUTPUT_DIR}"
 
 # Variable Tests (WILL BE DELETED)
 echo
 echo "Selected Branch: ${SELECTED_BRANCH}"
-echo "Archive Format: ${ARCHIVE_FORMAT}"
 echo "New Branch: ${NEW_BRANCH}"
-echo $TEST
 
 # CD to previous directory if executed from another directory
 cd -
