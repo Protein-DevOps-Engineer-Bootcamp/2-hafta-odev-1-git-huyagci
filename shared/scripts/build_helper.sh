@@ -12,13 +12,13 @@
 
 
 # Predefined Variables
+CURRENT_DIR=$(pwd)
 TARGET_DIR=/opt/project/java
-OUTPUT_PATH=$(pwd)
 
 # CD to target directory if executed from another directory
 cd $TARGET_DIR
 
-BUILD="mvn package"
+BUILD="mvn package -Dmaven.test.skip=true"
 
 USAGE_MSG="
     Usage: $(basename $0) [OPTION] [ARGUMENT]...
@@ -74,14 +74,16 @@ new_branch() {
     if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
 }
 
-# If arg is given set Output Path of the Archive else archive into same directory
-output_dir() {
-    if [ -n "${OPTARG}" ]; then OUTPUT_PATH=${OPTARG}; fi
-}
 
-skip_tests() {
-    if [ "${OPTARG}" == "true" ]; then BUILD+=" -Dmaven.test.skip=true"; fi 
-}
+
+# skip_tests() {
+#     if [ "${OPTARG}" == false ]
+#     then
+#         BUILD+=" -Dmaven.test.skip=false"
+#     else
+#         BUILD+=" -Dmaven.test.skip=true"
+#     fi 
+# }
 
 build() {
 
@@ -109,16 +111,16 @@ build() {
             echo
             echo "SELECTED BRANCH IS CURRENT BRANCH"
             echo
-            echo "OUTPUT:"
-            eval $BUILD
+            echo "OUTPUT COMMAND:"
+            eval echo $BUILD
             echo
         else
             echo
             echo "SELECTED BRANCH IS NOT CURRENT BRANCH... SWITCHING BRANCH"
             git switch ${SELECTED_BRANCH}
             echo
-            echo "OUTPUT:"
-            eval $BUILD
+            echo "OUTPUT COMMAND:"
+            eval echo $BUILD
             echo
         fi
     else
@@ -126,22 +128,34 @@ build() {
         echo "SELECTED BRANCH IS NOT EXISTS... CREATING REQUESTED BRANCH..."
         git checkout -b ${SELECTED_BRANCH}
         echo
-        echo "OUTPUT:"
-        eval $BUILD
+        echo "OUTPUT COMMAND:"
+        eval echo $BUILD
         echo
     fi
 }
 
-# compress() {
-#     TARGET_DIR=/opt/project
-#     TARGET_FILE=$(find $TARGET_DIR/ -type f -name "*.jar")
-#     if [ "${ARCHIVE_FORMAT}" == "zip" ]
-#     then
-#         zip -r ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
-#     else
-#         tar -Pczf ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
-#     fi
-# }
+compress() {
+
+    # If arg is given set Output Path of the Archive else archive into same directory
+    if [ -z "${OUTPUT_DIR}" ]
+    then
+        OUTPUT_DIR=${CURRENT_DIR}
+    else
+        OUTPUT_DIR=${OUTPUT_DIR}
+    fi
+    
+    echo "OUTPUT DIR:"
+    echo $OUTPUT_DIR
+    echo
+
+    # TARGET_FILE=$(find $TARGET_DIR/ -type f -name "*.jar")
+    # if [ "${ARCHIVE_FORMAT}" == "zip" ]
+    # then
+    #     zip -r ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+    # else
+    #     tar -Pczf ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+    # fi
+}
 
 # If no args are given show usage
 # if [ "$#" -lt 1 ]
@@ -158,7 +172,7 @@ do
         f) archive_artifact;;
         h) usage;;
         n) new_branch;;
-        p) output_dir;;
+        p) OUTPUT_DIR=${OPTARG};;
         t) skip_tests;;
         *) echo "Wildcard"
             ;;
@@ -174,7 +188,7 @@ done
 build
 
 # Compress
-# compress
+compress
 
 # Output informatin
 echo "Your artifact will be compressed and saved to ${OUTPUT_PATH}"
