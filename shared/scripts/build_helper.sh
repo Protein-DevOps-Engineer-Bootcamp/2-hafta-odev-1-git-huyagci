@@ -9,10 +9,11 @@
 # Email         : hasanumutyagci@gmail.com  #
 #############################################
 
+
+
 # Predefined Variables
 TARGET_DIR=/opt/project/java
-DEBUG=false
-SKIP_TESTS=false
+OUTPUT_PATH=$(pwd)
 
 # CD to target directory if executed from another directory
 cd $TARGET_DIR
@@ -25,6 +26,7 @@ USAGE_MSG="
     OPTIONS:    ARGUMENTS:
 
     [-b]        [branch_name]      Branch must be provided. If not on the branch switch then buil
+    [-c]                           Cleans the target folder
     [-d]        [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
     [-f]        [zip|tar]          Compress format of the artifact. Must be zip or tar.gz. Else break.
     [-h]                           Shows usage
@@ -38,9 +40,15 @@ usage() {
     exit 1
 }
 
-branch() {
-    SELECTED_BRANCH=${OPTARG}
-}
+# branch() {
+#     if [ -z "${OPTARG}" ]
+#     then
+#         echo "You did not provide a branch name. Selecting current branch."
+#         SELECTED_BRANCH=${CURRENT_BRANCH}
+#     else
+#         SELECTED_BRANCH=${OPTARG}
+#     fi
+# }
 
 debug_mode() {
     if [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
@@ -63,17 +71,12 @@ archive_artifact() {
 
 # Create a new branch (IF ARG IS GIVEN)
 new_branch() {
-    if [ "${OPTARG}" == {{{{{EXISTS}}}}} ]; then git branch ${OPTARG}; fi
+    if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
 }
 
-# If arg is given set Output Path of the Archive else build into same directory
-output_path() {
-    if [ "${OPTARG}" == {{{{{EXISTS}}}}} ]
-    then
-        OUTPUT_PATH=${OPTARG}
-    else
-        OUTPUT_PATH="${pwd}"
-    fi
+# If arg is given set Output Path of the Archive else archive into same directory
+output_dir() {
+    if [ -n "${OPTARG}" ]; then OUTPUT_PATH=${OPTARG}; fi
 }
 
 skip_tests() {
@@ -81,43 +84,64 @@ skip_tests() {
 }
 
 build() {
+
     BRANCH_LIST=( $(git branch | tr -d ' ,*') )
     CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-    echo
-    echo "Building project on ${SELECTED_BRANCH} branch"
-    echo
-    if [[ " ${BRANCH_LIST[*]} " =~ " ${SELECTED_BRANCH} " ]]
+
+    if [ -z "${SELECTED_BRANCH}" ];
     then
-        if [ " ${SELECTED_BRANCH} " == " ${CURRENT_BRANCH} " ]
+        SELECTED_BRANCH=${CURRENT_BRANCH}
+        echo
+        echo "Branch is not selected. Using Current Branch."
+            
+    fi
+
+    if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
+    then
+        echo
+        echo "Warning!!! You are building on ${SELECTED_BRANCH} branch!"
+    fi
+
+    if [[ "${BRANCH_LIST[*]}" =~ "${SELECTED_BRANCH}" ]]
+    then
+        if [ "${SELECTED_BRANCH}" == "${CURRENT_BRANCH}" ]
         then
             echo
             echo "SELECTED BRANCH IS CURRENT BRANCH"
             echo
-            eval echo $BUILD
+            echo "OUTPUT:"
+            eval $BUILD
+            echo
         else
             echo
-            echo "SELECTED BRANCH IS NOT CURRENT BRANCH SWITCHING BRANCH"
+            echo "SELECTED BRANCH IS NOT CURRENT BRANCH... SWITCHING BRANCH"
             git switch ${SELECTED_BRANCH}
-            eval echo $BUILD
+            echo
+            echo "OUTPUT:"
+            eval $BUILD
+            echo
         fi
     else
         echo
-        echo "SELECTED BRANCH IS NOT EXIST... CREATING REQUESTED BRANCH"
+        echo "SELECTED BRANCH IS NOT EXISTS... CREATING REQUESTED BRANCH..."
         git checkout -b ${SELECTED_BRANCH}
-        eval echo $BUILD
+        echo
+        echo "OUTPUT:"
+        eval $BUILD
+        echo
     fi
 }
 
-compress() {
-    TARGET_DIR=/opt/project
-    TARGET_FILE=$(find $TARGET_DIR/ -type f -name "*.jar")
-    if [ "${ARCHIVE_FORMAT}" == "zip" ]
-    then
-        zip -r ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
-    else
-        tar -czf ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
-    fi
-}
+# compress() {
+#     TARGET_DIR=/opt/project
+#     TARGET_FILE=$(find $TARGET_DIR/ -type f -name "*.jar")
+#     if [ "${ARCHIVE_FORMAT}" == "zip" ]
+#     then
+#         zip -r ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+#     else
+#         tar -Pczf ${OUTPUT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+#     fi
+# }
 
 # If no args are given show usage
 # if [ "$#" -lt 1 ]
@@ -128,16 +152,16 @@ compress() {
 while getopts b:d:f:n:p:t:h options
 do
     case "${options}" in
-        b) branch;;
+        b) SELECTED_BRANCH=${OPTARG};;
+            # branch;;
         d) debug_mode;;
         f) archive_artifact;;
         h) usage;;
         n) new_branch;;
-        p) output_path;;
+        p) output_dir;;
         t) skip_tests;;
-        # *) ??
-        #     usage
-        #     ;;
+        *) echo "Wildcard"
+            ;;
         ?)
             echo
             echo "Invalid Option: ${OPTARG}"
@@ -146,68 +170,24 @@ do
     esac
 done
 
-echo
-echo "Branch: ${SELECTED_BRANCH}"
-echo "Format: ${FORMAT}"
-echo "New Branch: ${NEW_BRANCH}"
-echo "Output Path: ${OUTPUT_PATH}"
-
-# if [ "${current_folder}" == false ]
-# then
-#     echo "Where is your pom.xml file located?"
-#     read PATH
-#     BUILD+= " -f $PATH"
-#     # mvn package -f /path/to/pom.xml
-# fi
-
 # Get build
 build
 
 # Compress
-compress
+# compress
+
+# Output informatin
+echo "Your artifact will be compressed and saved to ${OUTPUT_PATH}"
+
+# Variable Tests (WILL BE DELETED)
+echo
+echo "Selected Branch: ${SELECTED_BRANCH}"
+echo "Archive Format: ${ARCHIVE_FORMAT}"
+echo "New Branch: ${NEW_BRANCH}"
+echo $TEST
 
 # CD to previous directory if executed from another directory
 cd -
-
-###############################################################################
-# Shift Method for args
-###############################################################################
-# while true
-# do
-#     case "$1" in
-#         -b)
-#             BRANCH=$2
-#             shift 2
-#             ;;
-#         -d)
-#             DEBUG=$2
-#             shift 2
-#             ;;
-#         -f)
-#             FORMAT=$2
-#             shift 2
-#             ;;
-#         -h)
-#             usage
-#             ;;
-#         -n)
-#             NEW_BRANCH=$2
-#             shift 2
-#             ;;
-#         -p)
-#             OUTPUT_PATH=$2
-#             shift 2
-#             ;;
-#         -t)
-#             TESTS=$2
-#             shift 2
-#             ;;
-#         *)
-#             usage
-#             break
-#             ;;
-#     esac
-# done
 
 ###############################################################################
 # Some welcome messages etc..
