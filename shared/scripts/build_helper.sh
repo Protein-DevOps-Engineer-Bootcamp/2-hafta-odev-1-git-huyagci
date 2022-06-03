@@ -21,7 +21,7 @@ BUILD="mvn package -Dmaven.test.skip=true"
 USAGE_MSG="
     Usage: $(basename $0) [OPTION] [ARGUMENT]...
 
-    OPTIONS:    ARGUMENTS:
+    OPTIONS:    ARGUMENTS:         DESCRIPTION:
 
     [-b]        [branch_name]      Branch must be provided. If not on the branch switch then buil
     [-c]                           Cleans the target folder
@@ -43,7 +43,7 @@ debug_mode() {
 }
 
 clean_maven() {
-    BUILD="mvn clean"
+    echo $(mvn clean -q)
 }
 
 # Create a new branch (IF ARG IS GIVEN)
@@ -91,7 +91,7 @@ build() {
                 echo "SELECTED BRANCH IS $SELECTED_BRANCH EQUALS TO CURRENT BRANCH IS $CURRENT_BRANCH"
                 echo
                 echo "OUTPUT COMMAND:"
-                eval echo $BUILD
+                eval $BUILD
                 compress
                 echo
             else
@@ -100,7 +100,7 @@ build() {
                 git switch ${SELECTED_BRANCH}
                 echo
                 echo "OUTPUT COMMAND:"
-                eval echo $BUILD
+                eval $BUILD
                 compress
                 echo
             fi
@@ -110,7 +110,7 @@ build() {
             git checkout -b ${SELECTED_BRANCH}
             echo
             echo "OUTPUT COMMAND:"
-            eval echo $BUILD
+            eval $BUILD
             compress
             echo
         fi
@@ -146,13 +146,13 @@ compress() {
 
     if [ "${ARCHIVE_FORMAT}" == "zip" ]
     then
-        zip -r ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+        zip -q -j ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
         echo "$TARGET_FILE is archived as $ARCHIVE_FORMAT"
     fi
 
     if [ "${ARCHIVE_FORMAT}" == "tar.gz" ]
     then
-        tar -Pczf ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+        tar -C $(dirname "${TARGET_FILE}") -Pczf ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} $(basename "${TARGET_FILE}")
         echo "$TARGET_FILE is archived as $ARCHIVE_FORMAT"
     fi
 }
@@ -178,25 +178,27 @@ do
     esac
 done
 
-# Get build
-build
+# If -c opt is given clean maven target else get build
+if [[ "$1" == "-c" && "$1" -lt 1 ]]
+then
+    echo "Clean"
+    clean_maven
+else
+    echo "Build"
+    # Get build
+    build
+fi
 
-# Output information
-echo "Your artifact will be compressed and saved under ${OUTPUT_DIR}"
+# # Output information
+# echo "Your artifact will be compressed and saved under ${OUTPUT_DIR}"
 
-# Variable Tests (WILL BE DELETED)
-echo
-echo "Selected Branch: ${SELECTED_BRANCH}"
-echo "New Branch: ${NEW_BRANCH}"
+# # Variable Tests (WILL BE DELETED)
+# echo
+# echo "Selected Branch: ${SELECTED_BRANCH}"
+# echo "New Branch: ${NEW_BRANCH}"
 
 # CD to previous directory if executed from another directory
-cd -
-
-# If no args are given show usage
-# if [ "$#" -lt 1 ]
-# then
-#     usage
-# fi
+cd - &>/dev/null
 
 ###############################################################################
 # Some welcome messages etc..
