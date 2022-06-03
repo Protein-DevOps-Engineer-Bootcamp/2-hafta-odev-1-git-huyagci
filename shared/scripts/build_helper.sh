@@ -9,15 +9,19 @@
 # Email         : hasanumutyagci@gmail.com  #
 #############################################
 
-# Predefined Variables
+# Current directory of the user.
 CURRENT_DIR=$(pwd)
+
+# Project directory.
 TARGET_DIR=/opt/project/java
 
-# CD to target directory if executed from another directory
+# Change directory to target directory if the script executed from another directory.
 cd $TARGET_DIR
 
+# Default state of maven build command. Test skipping is true.
 BUILD="mvn package -Dmaven.test.skip=true"
 
+# Usage message of the script.
 USAGE_MSG="
     Usage: $(basename $0) [OPTION] [ARGUMENT]...
 
@@ -32,33 +36,36 @@ USAGE_MSG="
     [ -p ]      [artifact_path]    Copy compressed artifacts to given path
     [ -t ]      [true|false]       Run or skip tests
 "
-
+# Usage function to prompt usage message.
 usage() {
     echo "${USAGE_MSG}"
     exit 1
 }
 
+# Adds "-X" to build command if specified.
 debug_mode() {
     if [ -n "$OPTARG" ] && [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
 }
 
+# This command cleans the maven project in quiet mode by deleting the target directory.
 clean_maven() {
     echo $(mvn clean -q)
 }
 
-# Create a new branch (IF ARG IS GIVEN)
+# Creates a new branch if argument is specified.
 new_branch() {
     if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
 }
 
+# Changes the test skipping satete to false by changing the build command parameter to "-Dmaven.test.skip=false"
 tests() {
-    if [ "${OPTARG}" == true ]
-    then
-        BUILD=$(echo $BUILD | sed "s/"-Dmaven.test.skip=true"/"-Dmaven.test.skip=false"/g")
-    fi 
+    if [ "${OPTARG}" == true ]; then BUILD=$(echo $BUILD | sed "s/"-Dmaven.test.skip=true"/"-Dmaven.test.skip=false"/g"); fi 
 }
 
+# Main build function.
 build() {
+
+    # If archive format is not given OR if it is not "zip" OR "tar.gz" warn the user and stop execution.
     if [ -z "$ARCHIVE_FORMAT" ] || ! [[ "$ARCHIVE_FORMAT" == "zip" || "$ARCHIVE_FORMAT" == "tar.gz" ]]
     then
         echo
@@ -66,30 +73,38 @@ build() {
         usage
         exit 1
     else
+        # Get the available git branches in target directory and save it as an array.
         BRANCH_LIST=( $(git branch | tr -d ' ,*') )
 
+        # Check the current branch in target directory.
         CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 
+        # If branch name is not specified by "-b" flag accept current branch as selected branch to build.
         if [ -z "${SELECTED_BRANCH}" ]; then SELECTED_BRANCH=${CURRENT_BRANCH}; fi
 
+        # Check if the selected branch is exists in branch list.
         if [[ "${BRANCH_LIST[*]}" =~ "${SELECTED_BRANCH}" ]]
         then
+            # Warn the users if building from "main" or "master" branch.
             if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
             then
                 echo
                 echo "Be advised: You are building on ${SELECTED_BRANCH} branch!"
             fi
 
+            # If selected branch is the current branch, continue to build and invoke compress function.
             if [ "${SELECTED_BRANCH}" == "${CURRENT_BRANCH}" ]
             then
                 eval $BUILD
                 compress
             else
+            # If selected branch is not the current branch, switch branch first, build the project and invoke compress function.
                 git switch ${SELECTED_BRANCH}
                 eval $BUILD
                 compress
             fi
         else
+        # If the selected branch does not exists in branch list, warn the user about creating a new branch.
             echo
             echo "Requested branch does not exits!"
             echo 'Add "-n "'$SELECTED_BRANCH'" flag if you want to build it on a new branch.'
@@ -104,29 +119,45 @@ build() {
     fi
 }
 
+# Compressed archive function.
 compress() {
-    # If an arg is given, set output dir of the archive. else archive in same dir
+    # Check if "-p" argument is specified.
     if [ -z "${OUTPUT_DIR}" ]
     then
+        # If the "-p" argument is not specified, use the current directory as output directory and inform the user.
         OUTPUT_DIR=${CURRENT_DIR}
         echo
         echo "Output directory is not specified. Using current directory."
     else
+        # If the "-p" argument is specified, set the output directory of the archive.
         OUTPUT_DIR=${OUTPUT_DIR}
     fi
 
+    # Find artifacts using ".jar" or ".war" files under target directory.
     TARGET_FILE=$(find $TARGET_DIR/target/ -type f -name "*SNAPSHOT.jar" -or -name "*SNAPSHOT.war" )
 
+    # If "zip" format is requested;
     if [ "${ARCHIVE_FORMAT}" == "zip" ]
     then
+        # Compress it using "zip" in quiet mode. "-j" flag provides it does not store directory names.
         zip -q -j ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
     fi
 
+    # If "tar.gz" format is requested;
     if [ "${ARCHIVE_FORMAT}" == "tar.gz" ]
     then
+        #Compress it using "tar" utility. "-C" flag and "$(basename ${...})" provides changing the directory first then archive only the file.
         tar -C $(dirname "${TARGET_FILE}") -Pczf ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} $(basename "${TARGET_FILE}")
     fi
 }
+
+# While loop and case block.
+
+# ":" sign before the flags gives control of the unspecified flags to case itself.
+# Therefore "illegal option" error will not be triggered.
+
+# ":" signs after the flags indicates that flags can take arguments.
+# "-c" and "-h" are the only flags that can be used without an argument.
 
 while getopts ":b:d:f:n:p:t:ch" options
 do
@@ -146,14 +177,15 @@ do
     esac
 done
 
-# If -c opt is given clean maven target else get build
+# If only "-c" argument is given clean the maven project else start building.
 if [[ "$1" == "-c" && "$1" -lt 1 ]]
 then
+    # Clean the project.
     clean_maven
 else
-    # Get build
+    # Build the project.
     build
 fi
 
-# CD to previous directory if executed from another directory
+# Change directory to previous directory if executed from another directory.
 cd - &>/dev/null
