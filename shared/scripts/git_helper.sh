@@ -1,24 +1,29 @@
 #!/bin/bash
 
 TARGET_DIR=/opt/project
-FIND_GIT=$(find $TARGET_DIR/ -type d -name '*.git*')
-FIND_DIRS=$(find $TARGET_DIR/* -maxdepth 0 -type d)
 
 clear
 echo "This script will help you manage the git instances for the main script."
+echo "It can search, initiliaze, and terminate git instances on all sub folders of the target directory simultaneously."
 echo
+echo "Target Directory: ${TARGET_DIR}/"
+echo
+
 PS3="Make a selection: "
+
 OPTIONS=(
     "Search for Git"
     "Initialize Git"
     "Terminate Git"
     "Quit"
 )
+
 while true
 do
     select selection in "${OPTIONS[@]}"; do
         case $selection in
             "Search for Git")
+                FIND_GIT=$(find $TARGET_DIR/ -type d -name '*.git*')
                 echo
                 echo "Found Git under:"
                 echo
@@ -30,28 +35,29 @@ do
                 break
                 ;;
             "Initialize Git")
+                FIND_DIRS=$(find $TARGET_DIR/* -maxdepth 0 -type d)
                 for DIR in ${FIND_DIRS[@]}
                 do
                     echo
-                    echo "Initializing Git for '$DIR' directory:"
+                    echo "Initializing Git instances..."
                     echo
                     (cd "$DIR" && git config --global --add safe.directory $DIR)
                     (cd "$DIR" && git init -q && git add . && git commit -q -m "Initial commit")
+                    echo "Git is initialized under $DIR directory."
                 done
                 echo
                 break
                 ;;
             "Terminate Git")
+                FIND_GIT=$(find $TARGET_DIR/ -type d -name '*.git*')
                 echo
-                echo "Terminating Git for all directories under '$TARGET_DIR' directory:"
+                echo "Terminating all Git instances..."
                 echo
-                for DIR in ${FIND_DIRS[@]}
+                for DIR in ${FIND_GIT[@]}
                 do
-                    (cd "$DIR" && rm -rf .git/)
-                    (cd "$DIR" && echo "Git instance under $DIR is terminated.")
+                    (cd "$(dirname $DIR)" && rm -rf .git/)
+                    echo "Git instance under $(dirname $DIR) is terminated."
                 done
-                echo
-                echo "Done."
                 echo
                 break
                 ;;
