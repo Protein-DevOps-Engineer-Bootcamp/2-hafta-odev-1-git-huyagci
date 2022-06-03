@@ -55,8 +55,8 @@ sudo rm -f /usr/apache-maven-3.8.5-bin.tar.gz
 # Set Git Conf - will be edited
 sudo git config --system user.name "maven-builder"
 sudo git config --system user.email "maven-builder@bashscript.com"
-sudo git config --system --add safe.directory /opt/projects/java
-sudo git config --global --add safe.directory /opt/projects/java
+sudo git config --system --add safe.directory /opt/project/java
+sudo git config --global --add safe.directory /opt/project/java
 
 # Give execution perm to scripts
 # chmod +x /opt/scripts/git_helper.sh 
