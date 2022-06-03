@@ -1,5 +1,14 @@
 #!/bin/bash
 
+#############################################
+# Script Name   : Git Helper                #
+# File          : git_helper.sh             #
+# Usage         : ./git_helper.sh           #
+# Created       : 01/06/2022                #
+# Author        : Hasan Umut Yagci          #
+# Email         : hasanumutyagci@gmail.com  #
+#############################################
+
 # Target directory of the script
 TARGET_DIR=/opt/project
 
