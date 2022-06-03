@@ -1,4 +1,5 @@
 #! /bin/bash
+
 #############################################
 # Script Name   : Build Helper              #
 # File          : build_helper.sh           #
@@ -20,7 +21,7 @@ BUILD="mvn package"
 
 USAGE_MSG="
     Usage: $(basename $0) [OPTION] [ARGUMENT]...
-    
+
     OPTIONS:    ARGUMENTS:
 
     [-b]        [branch_name]      Branch must be provided. If not on the branch switch then buil
@@ -79,7 +80,7 @@ skip_tests() {
     if [ "${OPTARG}" == "true" ]; then BUILD+=" -Dmaven.test.skip=true"; fi 
 }
 
-build(){
+build() {
     BRANCH_LIST=( $(git branch | tr -d ' ,*') )
     CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
     echo
@@ -161,12 +162,12 @@ echo "Output Path: ${OUTPUT_PATH}"
 
 # Get build
 build
-compress
 
+# Compress
+compress
 
 # CD to previous directory if executed from another directory
 cd -
-
 
 ###############################################################################
 # Shift Method for args
