@@ -1,16 +1,22 @@
 #!/bin/bash
 
+# Target directory of the script
 TARGET_DIR=/opt/project
 
+# Clear the previous outputs. Stay at the top
 clear
+
+# Welcome & Feature messages
 echo "This script will help you manage the git instances for the main script."
 echo "It can search, initiliaze, and terminate git instances on all sub folders of the target directory simultaneously."
 echo
 echo "Target Directory: ${TARGET_DIR}/"
 echo
 
+# Prompt Message
 PS3="Make a selection: "
 
+# Script Options
 OPTIONS=(
     "Search for Git"
     "Initialize Git"
