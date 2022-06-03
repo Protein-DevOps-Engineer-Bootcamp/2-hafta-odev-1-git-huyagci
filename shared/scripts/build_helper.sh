@@ -72,14 +72,14 @@ build() {
 
         if [ -z "${SELECTED_BRANCH}" ]; then SELECTED_BRANCH=${CURRENT_BRANCH}; fi
 
-        if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
-        then
-            echo
-            echo "Warning!!! You are building on ${SELECTED_BRANCH} branch!"
-        fi
-
         if [[ "${BRANCH_LIST[*]}" =~ "${SELECTED_BRANCH}" ]]
         then
+            if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
+            then
+                echo
+                echo "Be advised: You are building on ${SELECTED_BRANCH} branch!"
+            fi
+
             if [ "${SELECTED_BRANCH}" == "${CURRENT_BRANCH}" ]
             then
                 eval $BUILD
@@ -111,8 +111,6 @@ compress() {
         OUTPUT_DIR=${CURRENT_DIR}
         echo
         echo "Output directory is not specified. Using current directory."
-        echo $OUTPUT_DIR
-        echo
     else
         OUTPUT_DIR=${OUTPUT_DIR}
     fi
