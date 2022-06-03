@@ -47,9 +47,9 @@ clean_maven() {
 }
 
 # Create a new branch (IF ARG IS GIVEN)
-# new_branch() {
-#     if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
-# }
+new_branch() {
+    if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
+}
 
 tests() {
     if [ "${OPTARG}" == true ]
@@ -106,12 +106,14 @@ build() {
             fi
         else
             echo
-            echo "SELECTED BRANCH IS NOT EXISTS... CREATING REQUESTED BRANCH..."
-            git checkout -b ${SELECTED_BRANCH}
-            echo
-            echo "OUTPUT COMMAND:"
-            eval $BUILD
-            compress
+            echo "Requested branch does not exits!"
+            echo 'Add "-n "'$SELECTED_BRANCH'" flag if you want to build it on a new branch.'
+            usage
+            # echo "SELECTED BRANCH IS NOT EXISTS... CREATING REQUESTED BRANCH..."
+            # git checkout -b ${SELECTED_BRANCH}
+            # echo "OUTPUT COMMAND:"
+            # eval $BUILD
+            # compress
             echo
         fi
     fi
