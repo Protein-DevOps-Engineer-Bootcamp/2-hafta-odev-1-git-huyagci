@@ -42,19 +42,21 @@ debug_mode() {
     if [ -n "$OPTARG" ] && [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
 }
 
+clean_maven() {
+    BUILD="mvn clean"
+}
+
 # Create a new branch (IF ARG IS GIVEN)
 # new_branch() {
 #     if [ -n "${OPTARG}" ]; then git branch ${OPTARG}; fi
 # }
 
-# skip_tests() {
-#     if [ "${OPTARG}" == false ]
-#     then
-#         BUILD+=" -Dmaven.test.skip=false"
-#     else
-#         BUILD+=" -Dmaven.test.skip=true"
-#     fi 
-# }
+tests() {
+    if [ "${OPTARG}" == true ]
+    then
+        BUILD=$(echo $BUILD | sed "s/"-Dmaven.test.skip=true"/"-Dmaven.test.skip=false"/g")
+    fi 
+}
 
 build() {
     if [ -z "$ARCHIVE_FORMAT" ] || ! [[ "$ARCHIVE_FORMAT" == "zip" || "$ARCHIVE_FORMAT" == "tar.gz" ]]
@@ -73,7 +75,6 @@ build() {
             SELECTED_BRANCH=${CURRENT_BRANCH}
             echo
             echo "BRANCH IS NOT SELECTED. USING $SELECTED_BRANCH CURRENT BRANCH $CURRENT_BRANCH"
-                
         fi
 
         if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
@@ -121,7 +122,7 @@ compress() {
     if [ -z "${OUTPUT_DIR}" ]
     then
         OUTPUT_DIR=${CURRENT_DIR}
-        echo "OUTPUT DIR IS NOT PROVIDED. USING WORKING DIR..."
+        echo "***OUTPUT DIR IS NOT PROVIDED. USING WORKING DIR..."
         echo
         echo "OUTPUT DIR:"
         echo $OUTPUT_DIR
@@ -156,16 +157,17 @@ compress() {
     fi
 }
 
-while getopts b:d:f:n:p:t:h options
+while getopts b:d:f:n:p:t:ch options
 do
     case "${options}" in
         b) SELECTED_BRANCH=${OPTARG};;
+        c) clean_maven;;
         d) debug_mode;;
         f) ARCHIVE_FORMAT=${OPTARG};;
         h) usage;;
         n) new_branch;;
         p) OUTPUT_DIR=${OPTARG};;
-        t) skip_tests;;
+        t) tests;;
         *) echo "Wildcard"
             ;;
         ?)
