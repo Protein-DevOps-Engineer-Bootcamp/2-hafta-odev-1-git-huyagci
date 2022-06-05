@@ -6,17 +6,20 @@
 
 [![Linux][#linux]][@linux] [![Bash][#bash]][@bash] [![Git][#git]][@git] [![VirtualBox][#virtualbox]][@virtualbox] [![Vagrant][#vagrant]][@vagrant]
 
-#### :hash: **Assignment** - [WILL BE TYPED PROPERLY]
+#### :hash: **Assignment**
 
-> Create a bash script that helps the developer to build a project on a specified branch in a working git repository. Script has to be able to:
->
-> - Switch between branches and build from given branch upon user requests.
+> Create a bash script that helps the developer to build a project[^1] on a specified branch in a working git repository.
+
+**Script has to be able to ;**
+
+> - Switch between branches and build from a given branch upon user requests.
 > - Warn the user if the branch is main or master.
-> - Can create a new branch upon user requests.
-> - Can enable/disable debug mode of maven. (Default must be disabled)
-> - Allow users to specify the compressed archive format as "zip" or "tar.gz". Script must be stop if any other format is given. (Default is "tar.gz")
-> - Set archive name as selected branch name.
-> - Set output directory for compressed archives upon user[^1] requests. (Default is working directory)
+> - Create a new branch upon user requests.
+> - Enable/disable debug mode of maven. _(Default must be disabled)_
+> - Allow users to specify the compressed archive format as "zip" or "tar.gz" formats. _(Default must be "tar.gz")_
+> - Terminate if any other compressed algorithms are given. _(Must use the default if not specified)_
+> - Set the archive name as the selected branch name.
+> - Set the output directory for compressed archives upon user requests. _(Default must be the working directory)_
 
 ### **Table of Contents**
 
