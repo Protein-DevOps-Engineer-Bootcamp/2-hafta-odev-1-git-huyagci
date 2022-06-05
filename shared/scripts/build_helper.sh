@@ -72,11 +72,11 @@ clean_maven() {
 
 # Adds "-X" to build command if specified.
 debug_mode() {
-    if [ -n "$OPTARG" ] && [ "${OPTARG}" == "true" ]
+    if [ -n "${OPTARG}" ] && [ "${OPTARG}" == "true" ]
     then
         BUILD+=" -X"
         echo -e "${CCYAN}[INFO]${COFF} Debug mode is enabled."
-        sleep 3
+        sleep 1.5
     fi
 }
 
@@ -91,11 +91,20 @@ new_branch() {
 
 # Changes the test skipping satete to false by changing the build command parameter to "-Dmaven.test.skip=false"
 tests() {
-    if [ "${OPTARG}" == true ]
+    if [ -n "${OPTARG}" ] && [ "${OPTARG}" == "true" ]
     then
         BUILD=$(echo $BUILD | sed "s/"-Dmaven.test.skip=true"/"-Dmaven.test.skip=false"/g")
         echo -e "${CCYAN}[INFO]${COFF} Tests will be applied."
-        sleep 3
+        sleep 1.5
+    fi 
+}
+
+quiet_mode() {
+    if [ -n "${OPTARG}" ] && [ "${OPTARG}" == "false" ]
+    then
+        BUILD=$(echo $BUILD | sed "s/"-q"/""/g")
+        echo -e "${CCYAN}[INFO]${COFF} Quiet mode disabled."
+        sleep 1.5
     fi 
 }
 
@@ -128,6 +137,7 @@ build() {
             if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
             then
                 echo -e "${CORANGE}[WARNING]${COFF} You are building on ${UORANGE}${SELECTED_BRANCH}${COFF} branch!"
+                sleep 3
             fi
 
             # If selected branch is the current branch, continue to build and invoke compress function.
@@ -212,7 +222,7 @@ compress() {
 
 # ":" signs after the flags indicates that flags can take arguments.
 # "-c" and "-h" are the only flags that can be used without an argument.
-while getopts ":b:d:f:n:p:t:ch" options
+while getopts ":b:d:f:n:p:t:q:ch" options
 do
     case "${options}" in
         b) SELECTED_BRANCH=${OPTARG};;
@@ -223,6 +233,7 @@ do
         n) new_branch;;
         p) OUTPUT_DIR=${OPTARG};;
         t) tests;;
+        q) quiet_mode;;
         ?) echo -e "${CRED}[ERROR]${COFF} Invalid Option: -${OPTARG}"; usage;;
     esac
 done
