@@ -31,7 +31,7 @@
 3. [Installation](#gear-installation)
    - [Automated](#automated)
    - [Manual](#manual)
-4. [Usage](#pencil-usage)
+4. [Usage](#wrench-usage)
 5. [Technologies](#computer-technologies)
 6. [Directories](#open_file_folder-directories)
 
@@ -85,7 +85,7 @@ This repository contains an assignment project developed under the [Patika.dev][
 3. Execute `bootstrap.sh` first to configure the machine settings.
 4. Run the scripts with the aliases configured or manually from the directories that are stated [**below**](#open_file_folder-directories).
 
-### :pencil: **Usage**
+### :wrench: **Usage**
 
 - Call the scripts from any directory with an acceptable arguments that are stated below.
 - The target directory of _Git Helper_ scripts is `/opt/project` directory.
