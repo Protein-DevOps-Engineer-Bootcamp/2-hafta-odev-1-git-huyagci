@@ -87,16 +87,33 @@ This repository contains an assignment project developed under the [Patika.dev][
 
 ### :pencil: **Usage**
 
-> -
-> -
-> -
-> -
-> -
+- Call the scripts from any directory with an acceptable arguments that are stated below.
+- The target directory of _Git Helper_ scripts is `/opt/project` directory.
+- The target directory of _Build Helper_ scripts is `/opt/project/java` directory.
+- You can change these settings by re-defining the `TARGET_DIR` variable within the scripts.
+
+##### **Parameters:**
+
+```bash
+OPTIONS:    ARGUMENTS:         DESCRIPTION:                             DEFAULT VALUE:
+
+[-b]        <branch_name>      Branch name to get the build from.       Current Branch
+[-f]        <zip|tar.gz>       Compress format of the artifact.         tar.gz
+[-p]        <artifact_path>    Output path of compressed artifacts.     Current Directory
+[-n]        <new_branch>       Creates a new branch if applied.
+
+[-q]        <true|false>       Enable or disable quiet mode.            Enabled
+[-d]        <true|false>       Enable or disable debug mode.            Disabled
+[-t]        <true|false>       Apply or skip tests.                     Skip
+
+[-c]                           Cleans the maven project if applied.
+[-h]                           Shows usage/help.
+```
 
 ### :computer: **Technologies**
 
 > - Linux
-> - Bash Scripting
+> - Bash Scripting :heart:
 > - Git SCM
 > - Oracle VM VirtualBox
 > - Vagrant by HashiCorp
