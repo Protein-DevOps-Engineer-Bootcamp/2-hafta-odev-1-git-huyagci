@@ -62,15 +62,6 @@ usage() {
     exit 1
 }
 
-# Adds "-X" to build command if specified.
-debug_mode() {
-    if [ -n "$OPTARG" ] && [ "${OPTARG}" == "true" ]
-    then BUILD+=" -X"
-    echo -e "${CCYAN}[INFO]${COFF} Debug mode is enabled."
-    sleep 2
-    fi
-}
-
 # This command cleans the maven project in quiet mode by deleting the target directory.
 clean_maven() {
     echo -e "${CCYAN}[INFO]${COFF} Cleaning the project..."
@@ -79,21 +70,32 @@ clean_maven() {
     exit 0
 }
 
+# Adds "-X" to build command if specified.
+debug_mode() {
+    if [ -n "$OPTARG" ] && [ "${OPTARG}" == "true" ]
+    then
+        BUILD+=" -X"
+        echo -e "${CCYAN}[INFO]${COFF} Debug mode is enabled."
+        sleep 3
+    fi
+}
+
 # Creates a new branch if argument is specified.
 new_branch() {
     if [ -n "${OPTARG}" ]
     then
-    git branch ${OPTARG}
-    echo -e "${CYELLOW}[CAUTION]${COFF} New Branch: ${OPTARG}"
+        git branch ${OPTARG}
+        echo -e "${CYELLOW}[CAUTION]${COFF} New Branch: ${OPTARG}"
     fi
 }
 
 # Changes the test skipping satete to false by changing the build command parameter to "-Dmaven.test.skip=false"
 tests() {
     if [ "${OPTARG}" == true ]
-    then BUILD=$(echo $BUILD | sed "s/"-Dmaven.test.skip=true"/"-Dmaven.test.skip=false"/g")
-    echo -e "${CCYAN}[INFO]${COFF} Tests will be applied."
-    sleep 2
+    then
+        BUILD=$(echo $BUILD | sed "s/"-Dmaven.test.skip=true"/"-Dmaven.test.skip=false"/g")
+        echo -e "${CCYAN}[INFO]${COFF} Tests will be applied."
+        sleep 3
     fi 
 }
 
