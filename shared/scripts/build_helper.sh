@@ -15,6 +15,9 @@ CURRENT_DIR=$(pwd)
 # Project directory.
 TARGET_DIR=/opt/project/java
 
+# Accepted compressed archive formats can be "zip", "tar.gz" and null. In case of null default "tar.gz" will be used.
+ACCEPTED_FORMATS=("" "zip" "tar.gz")
+
 # Change directory to target directory if the script executed from another directory.
 cd $TARGET_DIR
 
@@ -23,18 +26,18 @@ BUILD="mvn package -Dmaven.test.skip=true"
 
 # Usage message of the script.
 USAGE_MSG="
-    Usage: $(basename $0) [OPTION] [ARGUMENT]...
+Usage: $(basename $0) [OPTION] [ARGUMENT]...
 
-    OPTIONS:    ARGUMENTS:         DESCRIPTION:
+OPTIONS:    ARGUMENTS:         DESCRIPTION:
 
-    [ -b ]      [branch_name]      Branch must be provided. If not on the branch switch then buil
-    [ -c ]                         Cleans the target folder
-    [ -d ]      [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
-    [ -f ]      [zip|tar]          Compress format of the artifact. Must be zip or tar.gz. Else break.
-    [ -h ]                         Shows usage
-    [ -n ]      [new_branch]       Create a new branch
-    [ -p ]      [artifact_path]    Copy compressed artifacts to given path
-    [ -t ]      [true|false]       Run or skip tests
+[ -b ]      [branch_name]      Branch must be provided. If not on the branch switch then buil
+[ -c ]                         Cleans the target folder
+[ -d ]      [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
+[ -f ]      [zip|tar]          Compress format of the artifact. Must be zip or tar.gz. Else break.
+[ -h ]                         Shows usage
+[ -n ]      [new_branch]       Create a new branch
+[ -p ]      [artifact_path]    Copy compressed artifacts to given path
+[ -t ]      [true|false]       Run or skip tests
 "
 # Usage function to prompt usage message.
 usage() {
@@ -49,7 +52,10 @@ debug_mode() {
 
 # This command cleans the maven project in quiet mode by deleting the target directory.
 clean_maven() {
+    echo -e "\nCleaning project..."
     echo $(mvn clean -q)
+    echo -e "Done.\n"
+    exit 0
 }
 
 # Creates a new branch if argument is specified.
@@ -65,11 +71,11 @@ tests() {
 # Main build function.
 build() {
 
-    # If archive format is not given OR if it is not "zip" OR "tar.gz" warn the user and stop execution.
-    if [ -z "$ARCHIVE_FORMAT" ] || ! [[ "$ARCHIVE_FORMAT" == "zip" || "$ARCHIVE_FORMAT" == "tar.gz" ]]
+    # If archive format is not in accepted formats, warn the user and stop execution. 
+    if ! [[ "${ACCEPTED_FORMATS[*]}" =~ "${ARCHIVE_FORMAT}" ]]
     then
         echo
-        echo "You must provide a valid archive format. Must be 'zip' or 'tar.gz'"
+        echo "You must provide a valid format. Must be 'zip' or 'tar.gz"
         usage
         exit 1
     else
@@ -79,7 +85,7 @@ build() {
         # Check the current branch in target directory.
         CURRENT_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 
-        # If branch name is not specified by "-b" flag accept current branch as selected branch to build.
+        # If branch name is not specified by "-b" flag accept current branch as selected branch for build.
         if [ -z "${SELECTED_BRANCH}" ]; then SELECTED_BRANCH=${CURRENT_BRANCH}; fi
 
         # Check if the selected branch is exists in branch list.
@@ -109,18 +115,29 @@ build() {
             echo "Requested branch does not exits!"
             echo 'Add "-n "'$SELECTED_BRANCH'" flag if you want to build it on a new branch.'
             usage
-            # echo "SELECTED BRANCH IS NOT EXISTS... CREATING REQUESTED BRANCH..."
-            # git checkout -b ${SELECTED_BRANCH}
-            # echo "OUTPUT COMMAND:"
-            # eval $BUILD
-            # compress
-            echo
+            exit 1
         fi
     fi
 }
 
 # Compressed archive function.
 compress() {
+
+    # Selection of archive format. Depending on given, or not given arguments.
+    case $ARCHIVE_FORMAT in
+
+        # If not provided, use "tar.gz" as default.
+        "")
+        echo "Default selected as tar.gz"
+        ARCHIVE_FORMAT="tar.gz"
+        ;;
+
+        # If provided, use the specified format.
+        "zip" | "tar.gz")
+        ARCHIVE_FORMAT=$ARCHIVE_FORMAT
+        ;;
+    esac
+    
     # Check if "-p" argument is specified.
     if [ -z "${OUTPUT_DIR}" ]
     then
@@ -163,28 +180,25 @@ while getopts ":b:d:f:n:p:t:ch" options
 do
     case "${options}" in
         b) SELECTED_BRANCH=${OPTARG};;
-        c) clean_maven;;
+        c) clean="true";;
         d) debug_mode;;
         f) ARCHIVE_FORMAT=${OPTARG};;
         h) usage;;
         n) new_branch;;
         p) OUTPUT_DIR=${OPTARG};;
         t) tests;;
-        ?)  echo
-            echo "Invalid Option: -${OPTARG}"
-            usage
-            ;;
+        ?) echo -e "\nInvalid Option: -${OPTARG}"; usage;;
     esac
 done
 
-# If only "-c" argument is given clean the maven project else start building.
-if [[ "$1" == "-c" && "$1" -lt 1 ]]
+# If "-c" flag is specified, clean the maven project else start building.
+if [ ! $clean ]
 then
-    # Clean the project.
-    clean_maven
-else
     # Build the project.
     build
+else
+    # Clean the project.
+    clean_maven
 fi
 
 # Change directory to previous directory if executed from another directory.
