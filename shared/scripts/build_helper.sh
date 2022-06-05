@@ -39,18 +39,21 @@ BUILD="mvn package -q -Dmaven.test.skip=true"
 
 # Usage message of the script.
 USAGE_MSG="
-Usage: $(basename $0) [OPTION] [ARGUMENT]...
+Usage: $(basename $0) [OPTION] <ARGUMENT> ...
 
-OPTIONS:    ARGUMENTS:         DESCRIPTION:
+OPTIONS:    ARGUMENTS:         DESCRIPTION:                             DEFAULT VALUE:
 
-[ -b ]      [branch_name]      Branch must be provided. If not on the branch switch then buil
-[ -c ]                         Cleans the target folder
-[ -d ]      [true|false]       Enable|Disable debug mode. Default: DISABLED Must be taken from the user
-[ -f ]      [zip|tar.gz]       Compress format of the artifact. Must be zip or tar.gz. Else break.
-[ -h ]                         Shows usage
-[ -n ]      [new_branch]       Create a new branch
-[ -p ]      [artifact_path]    Copy compressed artifacts to given path
-[ -t ]      [true|false]       Run or skip tests
+[-b]        <branch_name>      Branch name to get the build from.       Current Branch
+[-f]        <zip|tar.gz>       Compress format of the artifact.         tar.gz
+[-p]        <artifact_path>    Output path of compressed artifacts.     Current Directory
+[-n]        <new_branch>       Creates a new branch if applied.
+
+[-q]        <true|false>       Enable or disable quiet mode.            Enabled
+[-d]        <true|false>       Enable or disable debug mode.            Disabled
+[-t]        <true|false>       Apply or skip tests.                     Skip
+
+[-c]                           Cleans the maven project if applied.
+[-h]                           Shows usage/help.
 "
 
 # Empty line after command execution.
@@ -184,15 +187,15 @@ compress() {
     esac
     
     # Check if "-p" argument is specified.
-    if [ -z "${OUTPUT_DIR}" ]
+    if [ -z "${ARTIFACT_PATH}" ]
     then
         # If the "-p" argument is not specified, use the current directory as output directory and inform the user.
-        OUTPUT_DIR=${CURRENT_DIR}
+        ARTIFACT_PATH=${CURRENT_DIR}
         echo -e "${CCYAN}[INFO]${COFF} Output Directory: $CURRENT_DIR ${CDGRAY}(Not specified, using current)${COFF}"
     else
         # If the "-p" argument is specified, set the output directory of the archive.
-        OUTPUT_DIR=${OUTPUT_DIR}
-        echo -e "${CCYAN}[INFO]${COFF} Output Directory: $OUTPUT_DIR"
+        ARTIFACT_PATH=${ARTIFACT_PATH}
+        echo -e "${CCYAN}[INFO]${COFF} Output Directory: $ARTIFACT_PATH"
     fi
 
     # Find artifacts using ".jar" or ".war" files under target directory.
@@ -202,7 +205,7 @@ compress() {
     if [ "${ARCHIVE_FORMAT}" == "zip" ]
     then
         # Compress it using "zip" in quiet mode. "-j" flag provides it does not store directory names.
-        zip -q -j ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+        zip -q -j ${ARTIFACT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
         echo -e "${CCYAN}[INFO]${COFF} Archive File: ${SELECTED_BRANCH}.${ARCHIVE_FORMAT}"
     fi
 
@@ -210,7 +213,7 @@ compress() {
     if [ "${ARCHIVE_FORMAT}" == "tar.gz" ]
     then
         #Compress it using "tar" utility. "-C" flag and "$(basename ${...})" provides changing the directory first then archive only the file.
-        tar -C $(dirname "${TARGET_FILE}") -Pczf ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} $(basename "${TARGET_FILE}")
+        tar -C $(dirname "${TARGET_FILE}") -Pczf ${ARTIFACT_PATH}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} $(basename "${TARGET_FILE}")
         echo -e "${CCYAN}[INFO]${COFF} Archive File: ${SELECTED_BRANCH}.${ARCHIVE_FORMAT}"
     fi
 }
@@ -222,18 +225,18 @@ compress() {
 
 # ":" signs after the flags indicates that flags can take arguments.
 # "-c" and "-h" are the only flags that can be used without an argument.
-while getopts ":b:d:f:n:p:t:q:ch" options
+while getopts ":b:f:p:n:q:d:t:ch" options 
 do
     case "${options}" in
         b) SELECTED_BRANCH=${OPTARG};;
-        c) clean="true";;
-        d) debug_mode;;
         f) ARCHIVE_FORMAT=${OPTARG};;
-        h) usage;;
+        p) ARTIFACT_PATH=${OPTARG};;
         n) new_branch;;
-        p) OUTPUT_DIR=${OPTARG};;
-        t) tests;;
         q) quiet_mode;;
+        d) debug_mode;;
+        t) tests;;
+        c) clean="true";;
+        h) usage;;
         ?) echo -e "${CRED}[ERROR]${COFF} Invalid Option: -${OPTARG}"; usage;;
     esac
 done
