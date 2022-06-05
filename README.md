@@ -88,7 +88,8 @@ This repository contains an assignment project developed under the [Patika.dev][
 
 ### :wrench: **Usage**
 
-- Call the scripts from any directory with an acceptable arguments that are stated below.
+- Built-in aliases are `githelper` and `buildhelper`. You may execute the scripts with the aliases if you executed `bootstrap.sh` first.
+- Optionally, you may call the scripts from any directory with an acceptable arguments that are stated below.
 - The target directory of _Git Helper_ scripts is `/opt/project` directory.
 - The target directory of _Build Helper_ scripts is `/opt/project/java` directory.
 - You can change these settings by re-defining the `TARGET_DIR` variable within the scripts.
