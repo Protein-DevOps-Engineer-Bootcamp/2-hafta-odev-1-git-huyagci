@@ -22,7 +22,7 @@ ACCEPTED_FORMATS=("" "zip" "tar.gz")
 cd $TARGET_DIR
 
 # Default state of maven build command. Test skipping is true.
-BUILD="mvn package -Dmaven.test.skip=true"
+BUILD="mvn package -q -Dmaven.test.skip=true"
 
 # Usage message of the script.
 USAGE_MSG="
@@ -47,14 +47,18 @@ usage() {
 
 # Adds "-X" to build command if specified.
 debug_mode() {
-    if [ -n "$OPTARG" ] && [ "${OPTARG}" == "true" ]; then BUILD+=" -X"; fi
+    if [ -n "$OPTARG" ] && [ "${OPTARG}" == "true" ]
+    then BUILD+=" -X"
+    echo "[INFO] Debug mode is enabled."
+    sleep 2
+    fi
 }
 
 # This command cleans the maven project in quiet mode by deleting the target directory.
 clean_maven() {
-    echo -e "\nCleaning project..."
+    echo -e "[INFO] Cleaning project..."
     echo $(mvn clean -q)
-    echo -e "Done.\n"
+    echo -e "[OK] Done."
     exit 0
 }
 
@@ -65,7 +69,11 @@ new_branch() {
 
 # Changes the test skipping satete to false by changing the build command parameter to "-Dmaven.test.skip=false"
 tests() {
-    if [ "${OPTARG}" == true ]; then BUILD=$(echo $BUILD | sed "s/"-Dmaven.test.skip=true"/"-Dmaven.test.skip=false"/g"); fi 
+    if [ "${OPTARG}" == true ]
+    then BUILD=$(echo $BUILD | sed "s/"-Dmaven.test.skip=true"/"-Dmaven.test.skip=false"/g")
+    echo "[INFO] Tests will not be skipped."
+    sleep 2
+    fi 
 }
 
 # Main build function.
@@ -74,8 +82,7 @@ build() {
     # If archive format is not in accepted formats, warn the user and stop execution. 
     if ! [[ "${ACCEPTED_FORMATS[*]}" =~ "${ARCHIVE_FORMAT}" ]]
     then
-        echo
-        echo "You must provide a valid format. Must be 'zip' or 'tar.gz"
+        echo -e "[ERROR] You must provide a valid format. Must be 'zip' or 'tar.gz"
         usage
         exit 1
     else
@@ -91,11 +98,13 @@ build() {
         # Check if the selected branch is exists in branch list.
         if [[ "${BRANCH_LIST[*]}" =~ "${SELECTED_BRANCH}" ]]
         then
+            # Standart info message.
+            echo -e "[INFO] Selected Branch: ${SELECTED_BRANCH}"
+
             # Warn the users if building from "main" or "master" branch.
             if [[ "$SELECTED_BRANCH" == "main" || "$SELECTED_BRANCH" == "master" ]]
             then
-                echo
-                echo "Be advised: You are building on ${SELECTED_BRANCH} branch!"
+                echo -e "[WARNING] You are building on ${SELECTED_BRANCH} branch!"
             fi
 
             # If selected branch is the current branch, continue to build and invoke compress function.
@@ -104,16 +113,16 @@ build() {
                 eval $BUILD
                 compress
             else
-            # If selected branch is not the current branch, switch branch first, build the project and invoke compress function.
+                # If selected branch is not the current branch, switch branch first, build the project and invoke compress function.
                 git switch ${SELECTED_BRANCH}
                 eval $BUILD
                 compress
             fi
         else
+
         # If the selected branch does not exists in branch list, warn the user about creating a new branch.
-            echo
-            echo "Requested branch does not exits!"
-            echo 'Add "-n "'$SELECTED_BRANCH'" flag if you want to build it on a new branch.'
+            echo -e "[ERROR] Requested branch does not exists!"
+            echo -e '[ERROR] Add " -n "'$SELECTED_BRANCH'" flag if you want to build it on a new branch.'
             usage
             exit 1
         fi
@@ -128,13 +137,14 @@ compress() {
 
         # If not provided, use "tar.gz" as default.
         "")
-        echo "Default selected as tar.gz"
         ARCHIVE_FORMAT="tar.gz"
+        echo -e "[INFO] Format not specified. Using Default: $ARCHIVE_FORMAT"
         ;;
 
         # If provided, use the specified format.
         "zip" | "tar.gz")
         ARCHIVE_FORMAT=$ARCHIVE_FORMAT
+        echo -e "[INFO] Archive Format: $ARCHIVE_FORMAT"
         ;;
     esac
     
@@ -143,11 +153,11 @@ compress() {
     then
         # If the "-p" argument is not specified, use the current directory as output directory and inform the user.
         OUTPUT_DIR=${CURRENT_DIR}
-        echo
-        echo "Output directory is not specified. Using current directory."
+        echo -e "[INFO] Output directory is not specified. Using Current: $CURRENT_DIR"
     else
         # If the "-p" argument is specified, set the output directory of the archive.
         OUTPUT_DIR=${OUTPUT_DIR}
+        echo -e "[INFO] Output Directory: $OUTPUT_DIR"
     fi
 
     # Find artifacts using ".jar" or ".war" files under target directory.
@@ -158,6 +168,7 @@ compress() {
     then
         # Compress it using "zip" in quiet mode. "-j" flag provides it does not store directory names.
         zip -q -j ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} ${TARGET_FILE}
+        echo -e "[INFO] Archive File: ${SELECTED_BRANCH}.${ARCHIVE_FORMAT}"
     fi
 
     # If "tar.gz" format is requested;
@@ -165,6 +176,7 @@ compress() {
     then
         #Compress it using "tar" utility. "-C" flag and "$(basename ${...})" provides changing the directory first then archive only the file.
         tar -C $(dirname "${TARGET_FILE}") -Pczf ${OUTPUT_DIR}/${SELECTED_BRANCH}.${ARCHIVE_FORMAT} $(basename "${TARGET_FILE}")
+        echo -e "[INFO] Archive File: ${SELECTED_BRANCH}.${ARCHIVE_FORMAT}"
     fi
 }
 
@@ -175,7 +187,6 @@ compress() {
 
 # ":" signs after the flags indicates that flags can take arguments.
 # "-c" and "-h" are the only flags that can be used without an argument.
-
 while getopts ":b:d:f:n:p:t:ch" options
 do
     case "${options}" in
@@ -187,7 +198,7 @@ do
         n) new_branch;;
         p) OUTPUT_DIR=${OPTARG};;
         t) tests;;
-        ?) echo -e "\nInvalid Option: -${OPTARG}"; usage;;
+        ?) echo -e "[ERROR] Invalid Option: -${OPTARG}"; usage;;
     esac
 done
 
