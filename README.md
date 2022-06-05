@@ -32,6 +32,7 @@
    - [Automated](#automated)
    - [Manual](#manual)
 4. [Usage](#wrench-usage)
+   - [Parameters](#parameters)
 5. [Technologies](#computer-technologies)
 6. [Directories](#open_file_folder-directories)
 
@@ -71,14 +72,14 @@ This repository contains an assignment project developed under the [Patika.dev][
 
 ### :gear: **Installation**
 
-#### _Automated_
+##### _Automated_
 
 1. Install [VirtualBox][@virtualbox] and [Vagrant][@vagrant-download] to your machine _if you do not have them_.
 2. Clone the project to your machine.
 3. Open your CLI, change directory to project directory, and type `vagrant up`.
 4. Vagrant will configure the virtual machine first then you may test the project.
 
-#### _Manual_
+##### _Manual_
 
 1. Download all of the project files.
 2. Copy all scripts under the `/shared/scripts` and sample project from `/shared/project/java` to your environment.
@@ -92,7 +93,7 @@ This repository contains an assignment project developed under the [Patika.dev][
 - The target directory of _Build Helper_ scripts is `/opt/project/java` directory.
 - You can change these settings by re-defining the `TARGET_DIR` variable within the scripts.
 
-##### **Parameters:**
+##### _Parameters_
 
 ```bash
 OPTIONS:    ARGUMENTS:         DESCRIPTION:                             DEFAULT VALUE:
