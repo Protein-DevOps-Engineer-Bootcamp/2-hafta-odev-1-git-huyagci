@@ -113,7 +113,7 @@ Project Samples     : /mnt/project
 
 <!-- Footnotes -->
 
-[^1]: Java Spring Boot with Maven Package Manager is provided as a sample project and script is built upon this configuration. (Can be modified to any other project)
+[^1]: Java Spring Boot with Maven Package Manager is provided as a sample project and the script is built upon this configuration. (Can be modified to any other project)
 
 <!-- Badge Index -->
 
